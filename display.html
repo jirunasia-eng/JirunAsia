@@ -55,7 +55,7 @@
             border-radius: 0px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-color: rgba(0, 0, 0, 0.5);
-            position: relative; overflow: hidden;
+            position: relative; overflow: visible;
             transition: background-color 0.3s ease;
             margin-bottom: 6px; 
         }
@@ -86,7 +86,7 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.9); 
         }
 
-        /* Badge Poin (Bintang, Angka, & Icon Gift) */
+        /* Badge Poin (Bintang & Angka Total) */
         .slot-star-number-group {
             position: absolute; top: 5px; left: 5px;
             z-index: 10; height: 18px;
@@ -96,7 +96,7 @@
             display: none; align-items: center;
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
             overflow: hidden;
-            padding-right: 5px;
+            padding-right: 6px;
             gap: 3px;
         }
 
@@ -118,10 +118,22 @@
             line-height: 1;
         }
 
-        .slot-gift-icon-small {
-            width: 14px; height: 14px;
-            object-fit: contain;
-            display: none;
+        /* Efek Animasi Icon Gift Muncul di Kanan Atas Kotak (Durasi 3 Detik) */
+        .gift-popup-effect {
+            position: absolute; top: 5px; right: 5px;
+            z-index: 20; width: 32px; height: 32px;
+            object-fit: contain; display: none;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+            animation: giftPopupAnim 3s ease forwards;
+        }
+
+        @keyframes giftPopupAnim {
+            0% { opacity: 0; transform: scale(0.3) translateY(10px); }
+            15% { opacity: 1; transform: scale(1.2) translateY(0); }
+            30% { transform: scale(1); }
+            80% { opacity: 1; transform: scale(1) translateY(0); }
+            100% { opacity: 0; transform: scale(0.8) translateY(-15px); }
         }
 
         /* Icon Mikrofon Baru */
@@ -240,12 +252,12 @@
 
             <!-- Kolom Kiri (Slot 1 & 2) -->
             <div class="side-column">
-                <div class="box" id="slot-1" data-points="0" data-gift="">
+                <div class="box" id="slot-1" data-points="0">
                     <div class="slot-star-number-group">
                         <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
                         <div class="slot-number-text">0</div>
-                        <img class="slot-gift-icon-small" alt="Gift">
                     </div>
+                    <img class="gift-popup-effect" alt="Gift Popup">
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -255,12 +267,12 @@
                     </div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
-                <div class="box" id="slot-2" data-points="0" data-gift="">
+                <div class="box" id="slot-2" data-points="0">
                     <div class="slot-star-number-group">
                         <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
                         <div class="slot-number-text">0</div>
-                        <img class="slot-gift-icon-small" alt="Gift">
                     </div>
+                    <img class="gift-popup-effect" alt="Gift Popup">
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -274,12 +286,12 @@
 
             <!-- Kolom Kanan (Slot 3 & 4) -->
             <div class="side-column">
-                <div class="box" id="slot-3" data-points="0" data-gift="">
+                <div class="box" id="slot-3" data-points="0">
                     <div class="slot-star-number-group">
                         <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
                         <div class="slot-number-text">0</div>
-                        <img class="slot-gift-icon-small" alt="Gift">
                     </div>
+                    <img class="gift-popup-effect" alt="Gift Popup">
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -289,12 +301,12 @@
                     </div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
-                <div class="box" id="slot-4" data-points="0" data-gift="">
+                <div class="box" id="slot-4" data-points="0">
                     <div class="slot-star-number-group">
                         <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
                         <div class="slot-number-text">0</div>
-                        <img class="slot-gift-icon-small" alt="Gift">
                     </div>
+                    <img class="gift-popup-effect" alt="Gift Popup">
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -318,6 +330,28 @@
             bgVideo.style.display = 'none';
             bgVideo.src = '';
         };
+
+        // Fungsi parsing format angka fleksibel (mendukung format biasa, 100K, 1.00M, dll)
+        function parseFlexiblePoints(val) {
+            if (!val) return 0;
+            let str = String(val).trim().toUpperCase();
+            let multiplier = 1;
+
+            if (str.endsWith('K')) {
+                multiplier = 1000;
+                str = str.slice(0, -1);
+            } else if (str.endsWith('M')) {
+                multiplier = 1000000;
+                str = str.slice(0, -1);
+            }
+
+            // Membersihkan titik/koma pemisah ribuan standar
+            str = str.replace(/\./g, '').replace(/,/g, '.');
+            let num = parseFloat(str);
+            if (isNaN(num)) return 0;
+
+            return Math.round(num * multiplier);
+        }
 
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
@@ -367,27 +401,25 @@
 
                 if (data.clear) {
                     slotEl.dataset.points = "0";
-                    slotEl.dataset.gift = "";
                     slotEl.classList.remove('active-slot');
                     slotEl.innerHTML = `
                         <div class="slot-star-number-group" style="display: none;">
                             <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
                             <div class="slot-number-text">0</div>
-                            <img class="slot-gift-icon-small" alt="Gift">
                         </div>
+                        <img class="gift-popup-effect" alt="Gift Popup">
                         <div class="mic-icon-bottom-right" style="display: none;">${micSvgHTML}</div>
                         <span class="plus">+</span><span class="label">Permintaan</span>
                     `;
                 } else {
                     slotEl.dataset.points = "0";
-                    slotEl.dataset.gift = "";
                     slotEl.classList.add('active-slot');
                     slotEl.innerHTML = `
                         <div class="slot-star-number-group" style="display: flex;">
                             <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
                             <div class="slot-number-text">0</div>
-                            <img class="slot-gift-icon-small" alt="Gift" style="display: none;">
                         </div>
+                        <img class="gift-popup-effect" alt="Gift Popup">
                         <div class="mic-icon-bottom-right" style="display: flex;">${micSvgHTML}</div>
                         <div class="slot-content"><img src="${data.photo}" class="slot-avatar" alt="Avatar"></div>
                         <div class="slot-name-bottom"><span class="name-text">${data.name}</span><span class="plus-icon-large">✚</span></div>
@@ -399,21 +431,25 @@
                 const slotEl = document.getElementById(`slot-${data.slot}`);
                 if (!slotEl) return;
 
-                let currentPoints = parseInt(slotEl.dataset.points || "0") + parseInt(data.addPoints || 0);
+                // Mendukung penambahan poin dengan deteksi otomatis (angka biasa, K, M)
+                const addedValue = parseFlexiblePoints(data.addPoints);
+                let currentPoints = parseInt(slotEl.dataset.points || "0") + addedValue;
                 slotEl.dataset.points = currentPoints;
-                if (data.giftIcon) {
-                    slotEl.dataset.gift = data.giftIcon;
-                }
 
                 const numberText = slotEl.querySelector('.slot-number-text');
                 const groupEl = slotEl.querySelector('.slot-star-number-group');
-                const giftImgEl = slotEl.querySelector('.slot-gift-icon-small');
+                const giftPopup = slotEl.querySelector('.gift-popup-effect');
 
                 if (numberText) numberText.innerText = currentPoints.toLocaleString('id-ID');
                 if (groupEl) groupEl.style.display = 'flex';
-                if (giftImgEl && slotEl.dataset.gift) {
-                    giftImgEl.src = slotEl.dataset.gift;
-                    giftImgEl.style.display = 'inline-block';
+
+                // Tampilkan icon gift melayang di kanan atas kotak selama tepat 3 detik dengan restart animasi
+                if (giftPopup && data.giftIcon) {
+                    giftPopup.src = data.giftIcon;
+                    giftPopup.style.display = 'block';
+                    giftPopup.style.animation = 'none';
+                    void giftPopup.offsetWidth; // Trigger reflow untuk merestart keyframes animation
+                    giftPopup.style.animation = 'giftPopupAnim 3s ease forwards';
                 }
             }
         };
