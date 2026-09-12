@@ -331,7 +331,7 @@
             bgVideo.src = '';
         };
 
-        // Fungsi parsing format angka fleksibel (mendukung format biasa, 100K, 1.00M, dll)
+        // Fungsi parsing input poin (bisa menerima angka biasa, format "100K", "1.5M", dll)
         function parseFlexiblePoints(val) {
             if (!val) return 0;
             let str = String(val).trim().toUpperCase();
@@ -345,12 +345,24 @@
                 str = str.slice(0, -1);
             }
 
-            // Membersihkan titik/koma pemisah ribuan standar
             str = str.replace(/\./g, '').replace(/,/g, '.');
             let num = parseFloat(str);
             if (isNaN(num)) return 0;
 
             return Math.round(num * multiplier);
+        }
+
+        // Fungsi format angka total ke format K (ribuan) dan M (jutaan) otomatis
+        function formatDisplayPoints(total) {
+            if (total >= 1000000) {
+                let mVal = total / 1000000;
+                // Tampilkan desimal jika ada, misal 1.05M atau dibulatkan jika pas
+                return (mVal % 1 === 0 ? mVal.toFixed(0) : mVal.toFixed(2).replace(/\.?0+$/, '')) + 'M';
+            } else if (total >= 1000) {
+                let kVal = total / 1000;
+                return (kVal % 1 === 0 ? kVal.toFixed(0) : kVal.toFixed(1).replace(/\.?0+$/, '')) + 'K';
+            }
+            return total.toLocaleString('id-ID');
         }
 
         channel.onmessage = (event) => {
@@ -431,7 +443,6 @@
                 const slotEl = document.getElementById(`slot-${data.slot}`);
                 if (!slotEl) return;
 
-                // Mendukung penambahan poin dengan deteksi otomatis (angka biasa, K, M)
                 const addedValue = parseFlexiblePoints(data.addPoints);
                 let currentPoints = parseInt(slotEl.dataset.points || "0") + addedValue;
                 slotEl.dataset.points = currentPoints;
@@ -440,15 +451,16 @@
                 const groupEl = slotEl.querySelector('.slot-star-number-group');
                 const giftPopup = slotEl.querySelector('.gift-popup-effect');
 
-                if (numberText) numberText.innerText = currentPoints.toLocaleString('id-ID');
+                // Terapkan format K untuk ribuan dan M untuk jutaan
+                if (numberText) numberText.innerText = formatDisplayPoints(currentPoints);
                 if (groupEl) groupEl.style.display = 'flex';
 
-                // Tampilkan icon gift melayang di kanan atas kotak selama tepat 3 detik dengan restart animasi
+                // Tampilkan icon gift melayang di kanan atas kotak selama 3 detik
                 if (giftPopup && data.giftIcon) {
                     giftPopup.src = data.giftIcon;
                     giftPopup.style.display = 'block';
                     giftPopup.style.animation = 'none';
-                    void giftPopup.offsetWidth; // Trigger reflow untuk merestart keyframes animation
+                    void giftPopup.offsetWidth; // Trigger reflow animasi
                     giftPopup.style.animation = 'giftPopupAnim 3s ease forwards';
                 }
             }
