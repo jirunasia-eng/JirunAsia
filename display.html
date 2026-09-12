@@ -184,15 +184,16 @@
             z-index: 5; background: transparent;
         }
         
+        /* Foto target dibuat lebih besar (dari 48px ke 60px) */
         .slot-avatar { 
-            width: 48px; height: 48px; 
+            width: 60px; height: 60px; 
             border-radius: 50%; 
             object-fit: cover; 
-            margin-bottom: 3px; 
-            border: 1px solid #fff; 
+            margin-bottom: 2px; 
+            border: 1.5px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus: Dibuat pas/compact (tidak terlalu panjang memenuhi kotak) */
+        /* Label Nama Target & Icon Plus disesuaikan posisinya agar lebih presisi dan tebal */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
@@ -204,17 +205,17 @@
         }
         .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; }
         
-        /* Icon plus disamakan karakternya persis seperti teks "Permintaan" */
+        /* Icon plus dipertebal dan disesuaikan stylenya agar konsisten */
         .slot-name-bottom .plus-icon-large { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 14px; 
+            font-size: 15px; 
             font-weight: 700; 
-            color: #b0b0b0; 
+            color: #ffffff; /* Dibuat putih terang agar lebih jelas dan tegas */
             line-height: 0.7; 
             transform: scaleY(1.3);
             display: inline-block;
             flex-shrink: 0;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.9);
         }
     </style>
 </head>
