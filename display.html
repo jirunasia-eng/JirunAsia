@@ -9,12 +9,13 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #000000; color: #ffffff;
+            background-color: #0b0b0b; color: #ffffff;
             font-family: Arial, sans-serif; overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh;
         }
 
+        /* Container utama disesuaikan untuk memaksimalkan ruang vertikal 9:16 */
         .wrapper-9-16 {
             width: 495px;
             height: 880px;
@@ -24,9 +25,10 @@
             align-items: center;
             justify-content: flex-start;
             position: relative;
-            padding: 18px 14px;
-            border: 1px solid #222;
+            padding: 24px 14px;
+            border: 1px solid #333;
             overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
         .main-container {
@@ -34,29 +36,29 @@
             display: flex; 
             justify-content: center; 
             align-items: flex-start;
-            gap: 2px; 
+            gap: 3px; 
             width: 100%;
-            z-index: 1;
+            z-index: 2;
         }
 
         .side-column { 
             display: flex; 
             flex-direction: column; 
             justify-content: space-between; 
-            height: 380px; /* Diperpanjang menjadi 380px */
+            height: 420px; /* Dioptimalkan untuk keseimbangan visual 9:16 */
         }
 
-        /* Kotak 1-4: Lebar 111px, Tinggi 186px (diperpanjang agar lebih panjang ke bawah) */
+        /* Kotak 1-4: Lebar 111px, Tinggi 206px */
         .box {
             width: 111px; 
-            height: 186px; 
+            height: 206px; 
             border: 1px solid rgba(255, 255, 255, 0.8); 
             border-radius: 0px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-color: rgba(0, 0, 0, 0.6);
             position: relative; overflow: hidden;
             transition: background-color 0.3s ease;
-            margin-bottom: 8px; /* Spasi tipis rapat antara kotak atas dan bawah */
+            margin-bottom: 8px; 
         }
 
         .side-column .box:last-child { margin-bottom: 0; }
@@ -67,7 +69,7 @@
 
         .box .plus { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 52px; 
+            font-size: 54px; 
             font-weight: 700; 
             color: #b0b0b0; 
             text-shadow: 0 1px 2px rgba(0,0,0,0.8); 
@@ -127,15 +129,15 @@
             width: 12px; height: 12px; fill: #ffffff;
         }
 
-        /* Kotak Host: Diperpanjang tingginya menjadi 380px agar persis sama dengan kolom kotak kecil */
+        /* Kotak Host: Tinggi 420px agar seimbang dengan slot kecil */
         .host-box {
-            width: 195px; height: 380px;
+            width: 195px; height: 420px;
             border: 1px solid rgba(255, 255, 255, 0.8); 
             border-radius: 0px;
             position: relative; 
             background-color: rgba(0, 0, 0, 0.6);
             overflow: hidden;
-            margin-right: 2px; 
+            margin-right: 3px; 
         }
 
         .host-badge-top {
@@ -162,9 +164,10 @@
             pointer-events: none;
         }
 
+        /* Lapisan video animasi background dibuat selayar penuh agar efek transisi/animasinya megah */
         .bg-video-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 20; display: none;
+            object-fit: cover; z-index: 10; display: none;
             pointer-events: none; mix-blend-mode: screen; 
         }
 
@@ -181,7 +184,7 @@
         }
         
         .slot-avatar { 
-            width: 56px; height: 56px; 
+            width: 58px; height: 58px; 
             border-radius: 50%; 
             object-fit: cover; 
             margin-bottom: 4px; 
