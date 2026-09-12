@@ -312,7 +312,7 @@
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                             <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                             <line x1="3" y1="3" x2="21" y2="21" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-                        </svg>
+                        </screenshot>
                     </div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
@@ -331,9 +331,9 @@
             bgVideo.src = '';
         };
 
-        // Fungsi parsing input poin (bisa menerima angka biasa, format "100K", "1.5M", dll)
+        // Memperbaiki parser agar mengenali angka bulat biasa (misal 42999) atau string desimal/huruf (K/M) dengan benar
         function parseFlexiblePoints(val) {
-            if (!val) return 0;
+            if (val === undefined || val === null) return 0;
             let str = String(val).trim().toUpperCase();
             let multiplier = 1;
 
@@ -345,18 +345,32 @@
                 str = str.slice(0, -1);
             }
 
-            str = str.replace(/\./g, '').replace(/,/g, '.');
+            // Hapus titik sebagai pemisah ribuan jika ada (misal: "42.999" menjadi "42999"), ubah koma jadi titik
+            if (str.includes('.') && str.includes(',')) {
+                str = str.replace(/\./g, '').replace(',', '.');
+            } else if (str.includes('.')) {
+                // Jika titik dipakai sebagai pemisah ribuan standar Indonesia (contoh: 42.999)
+                // Cek apakah setelah titik ada tepat 3 digit
+                let parts = str.split('.');
+                if (parts.length > 1 && parts[parts.length - 1].length === 3) {
+                    str = str.replace(/\./g, '');
+                } else {
+                    str = str.replace('.', '.');
+                }
+            } else if (str.includes(',')) {
+                str = str.replace(',', '.');
+            }
+
             let num = parseFloat(str);
             if (isNaN(num)) return 0;
 
             return Math.round(num * multiplier);
         }
 
-        // Fungsi format angka total ke format K (ribuan) dan M (jutaan) otomatis
+        // Format angka ke format K dan M secara otomatis
         function formatDisplayPoints(total) {
             if (total >= 1000000) {
                 let mVal = total / 1000000;
-                // Tampilkan desimal jika ada, misal 1.05M atau dibulatkan jika pas
                 return (mVal % 1 === 0 ? mVal.toFixed(0) : mVal.toFixed(2).replace(/\.?0+$/, '')) + 'M';
             } else if (total >= 1000) {
                 let kVal = total / 1000;
@@ -451,16 +465,14 @@
                 const groupEl = slotEl.querySelector('.slot-star-number-group');
                 const giftPopup = slotEl.querySelector('.gift-popup-effect');
 
-                // Terapkan format K untuk ribuan dan M untuk jutaan
                 if (numberText) numberText.innerText = formatDisplayPoints(currentPoints);
                 if (groupEl) groupEl.style.display = 'flex';
 
-                // Tampilkan icon gift melayang di kanan atas kotak selama 3 detik
                 if (giftPopup && data.giftIcon) {
                     giftPopup.src = data.giftIcon;
                     giftPopup.style.display = 'block';
                     giftPopup.style.animation = 'none';
-                    void giftPopup.offsetWidth; // Trigger reflow animasi
+                    void giftPopup.offsetWidth; 
                     giftPopup.style.animation = 'giftPopupAnim 3s ease forwards';
                 }
             }
