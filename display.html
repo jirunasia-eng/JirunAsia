@@ -193,7 +193,7 @@
             border: 2px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus */
+        /* Label Nama Target & Icon Plus ✚ */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
@@ -208,20 +208,20 @@
             display: inline-flex; align-items: center; 
         }
         
-        /* Icon plus diselaraskan tepat di tengah secara vertikal */
+        /* Menggunakan simbol ✚ khusus dengan penyesuaian ukuran dan posisi vertikal */
         .slot-name-bottom .plus-icon-large { 
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 15px; 
-            font-weight: 700; 
+            font-family: Arial, sans-serif;
+            font-size: 11px; 
+            font-weight: bold; 
             color: #ffffff; 
             line-height: 1; 
             display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            text-shadow: 0 0 1px #ffffff, 0 1px 2px rgba(0,0,0,0.9);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.9);
             position: relative;
-            top: -1px; 
+            top: -0.5px; 
         }
     </style>
 </head>
@@ -379,7 +379,7 @@
                         <div class="slot-star-number-group" style="display: flex;"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">${calculatedPoints}</div></div>
                         <div class="mic-icon-bottom-right" style="display: flex;">${micSvgHTML}</div>
                         <div class="slot-content"><img src="${data.photo}" class="slot-avatar" alt="Avatar"></div>
-                        <div class="slot-name-bottom"><span class="name-text">${data.name}</span><span class="plus-icon-large">+</span></div>
+                        <div class="slot-name-bottom"><span class="name-text">${data.name}</span><span class="plus-icon-large">✚</span></div>
                     `;
                 }
             }
