@@ -43,21 +43,23 @@
             display: flex; 
             flex-direction: column; 
             justify-content: space-between; 
-            height: 480px; /* Menyamakan tinggi persis dengan kotak host */
+            height: 380px; /* Diperpanjang menjadi 380px */
         }
 
-        /* Kotak 1-8: Tinggi pas 120px (480 / 4) agar bagian bawahnya rata dan tidak ada sisa jarak */
+        /* Kotak 1-4: Lebar 111px, Tinggi 186px (diperpanjang agar lebih panjang ke bawah) */
         .box {
-            width: 105px; 
-            height: 120px; 
+            width: 111px; 
+            height: 186px; 
             border: 1px solid rgba(255, 255, 255, 0.8); 
             border-radius: 0px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-color: rgba(0, 0, 0, 0.6);
             position: relative; overflow: hidden;
             transition: background-color 0.3s ease;
-            margin-bottom: 0px; /* Spasi diatur langsung oleh space-between column */
+            margin-bottom: 8px; /* Spasi tipis rapat antara kotak atas dan bawah */
         }
+
+        .side-column .box:last-child { margin-bottom: 0; }
 
         .box.active-slot {
             background-color: rgba(100, 100, 100, 0.85);
@@ -65,7 +67,7 @@
 
         .box .plus { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 42px; 
+            font-size: 52px; 
             font-weight: 700; 
             color: #b0b0b0; 
             text-shadow: 0 1px 2px rgba(0,0,0,0.8); 
@@ -76,27 +78,27 @@
 
         .box .label { 
             font-family: Arial, sans-serif;
-            font-size: 9px; 
+            font-size: 10px; 
             font-weight: 400;
             color: #b0b0b0;
-            margin-top: 4px; 
+            margin-top: 6px; 
             text-shadow: 0 1px 2px rgba(0,0,0,0.8); 
         }
 
         .slot-star-number-group {
-            position: absolute; top: 4px; left: 4px;
-            z-index: 10; height: 15px;
+            position: absolute; top: 6px; left: 6px;
+            z-index: 10; height: 18px;
             background-color: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 12px;
             display: none; align-items: center;
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
             overflow: hidden;
-            padding-right: 5px;
+            padding-right: 6px;
         }
 
         .slot-star-circle-small {
-            width: 11px; height: 11px;
+            width: 13px; height: 13px;
             background-color: #1890ff;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -104,30 +106,30 @@
         }
 
         .slot-star-circle-small .star-icon {
-            font-size: 6px; color: #ffffff; line-height: 1;
+            font-size: 7px; color: #ffffff; line-height: 1;
         }
 
         .slot-number-text {
-            padding: 0 4px;
+            padding: 0 5px;
             color: #ffffff;
-            font-size: 8px; font-weight: bold;
+            font-size: 9px; font-weight: bold;
             line-height: 1;
         }
 
         .mic-icon-bottom-right {
-            position: absolute; bottom: 3px; right: 3px;
-            z-index: 10; width: 18px; height: 18px;
+            position: absolute; bottom: 6px; right: 6px;
+            z-index: 10; width: 22px; height: 22px;
             background-color: rgba(0, 0, 0, 0.7); border-radius: 0px;
             display: none; align-items: center; justify-content: center;
             border: 1px solid rgba(0, 0, 0, 0.9);
         }
         .mic-icon-bottom-right svg {
-            width: 10px; height: 10px; fill: #ffffff;
+            width: 12px; height: 12px; fill: #ffffff;
         }
 
-        /* Kotak Host (lebar 195px, tinggi 480px) */
+        /* Kotak Host: Diperpanjang tingginya menjadi 380px agar persis sama dengan kolom kotak kecil */
         .host-box {
-            width: 195px; height: 480px;
+            width: 195px; height: 380px;
             border: 1px solid rgba(255, 255, 255, 0.8); 
             border-radius: 0px;
             position: relative; 
@@ -179,26 +181,26 @@
         }
         
         .slot-avatar { 
-            width: 42px; height: 42px; 
+            width: 56px; height: 56px; 
             border-radius: 50%; 
             object-fit: cover; 
-            margin-bottom: 2px; 
+            margin-bottom: 4px; 
             border: 1px solid #fff; 
         }
         
         .slot-name-bottom {
-            position: absolute; bottom: 3px; left: 3px;
+            position: absolute; bottom: 6px; left: 6px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
-            font-size: 9.5px; font-weight: bold; padding: 2px 7px; 
+            font-size: 10px; font-weight: bold; padding: 2px 8px; 
             border-radius: 12px; 
-            max-width: 72%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 75%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex; align-items: center; gap: 3px;
+            display: flex; align-items: center; gap: 4px;
         }
         .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; }
         .slot-name-bottom .plus-icon-large { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 18px; 
+            font-size: 20px; 
             font-weight: 700; 
             color: #b0b0b0; 
             line-height: 1; 
@@ -217,6 +219,7 @@
                 <div class="host-name-bottom" id="hostNameText"></div>
             </div>
 
+            <!-- Kolom Kiri (Slot 1 & 2) -->
             <div class="side-column">
                 <div class="box" id="slot-1">
                     <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
@@ -228,35 +231,16 @@
                     <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
+            </div>
+
+            <!-- Kolom Kanan (Slot 3 & 4) -->
+            <div class="side-column">
                 <div class="box" id="slot-3">
                     <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
                     <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
                 <div class="box" id="slot-4">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
-                    <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
-                    <span class="plus">+</span><span class="label">Permintaan</span>
-                </div>
-            </div>
-
-            <div class="side-column">
-                <div class="box" id="slot-5">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
-                    <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
-                    <span class="plus">+</span><span class="label">Permintaan</span>
-                </div>
-                <div class="box" id="slot-6">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
-                    <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
-                    <span class="plus">+</span><span class="label">Permintaan</span>
-                </div>
-                <div class="box" id="slot-7">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
-                    <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
-                    <span class="plus">+</span><span class="label">Permintaan</span>
-                </div>
-                <div class="box" id="slot-8">
                     <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
                     <div class="mic-icon-bottom-right"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
