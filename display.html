@@ -118,9 +118,9 @@
             line-height: 1;
         }
 
-        /* Icon Mikrofon Baru */
+        /* Icon Mikrofon Baru: Digeser sedikit ke atas (bottom diubah dari 5px ke 7px) */
         .mic-icon-bottom-right {
-            position: absolute; bottom: 5px; right: 5px;
+            position: absolute; bottom: 7px; right: 5px;
             z-index: 10; width: 18px; height: 18px;
             background-color: rgba(0, 0, 0, 0.7); 
             border-radius: 50%; 
@@ -184,7 +184,7 @@
             z-index: 5; background: transparent;
         }
         
-        /* Foto target diperbesar lagi menjadi 72px agar lebih jelas */
+        /* Foto target diperbesar (72px) */
         .slot-avatar { 
             width: 72px; height: 72px; 
             border-radius: 50%; 
@@ -193,31 +193,32 @@
             border: 2px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus disesuaikan agar posisinya pas di tengah secara vertikal & horizontal */
+        /* Label Nama Target & Icon Plus: Menggunakan Flexbox dengan align-items center murni agar posisinya pas di tengah vertikal */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
-            font-size: 9px; font-weight: bold; padding: 2px 6px; 
+            font-size: 9px; font-weight: bold; padding: 3px 7px 2px 7px; 
             border-radius: 10px; 
             max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border: 1px solid rgba(255, 255, 255, 0.3);
             display: inline-flex; align-items: center; gap: 4px;
         }
-        .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; line-height: 1; }
         
-        /* Icon plus dibuat jauh lebih tebal (menggunakan font-weight 900 / text-stroke atau penyesuaian skala) dan posisinya diselaraskan ke tengah */
+        /* Icon plus diselaraskan agar pas di tengah secara vertikal, tebal, dan proporsional */
         .slot-name-bottom .plus-icon-large { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 16px; 
-            font-weight: 900; 
+            font-size: 15px; 
+            font-weight: 700; 
             color: #ffffff; 
             line-height: 1; 
-            transform: scaleY(1.1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            text-shadow: 0 0 1px #ffffff, 0 1px 2px rgba(0,0,0,0.9); /* Efek tebal menyala */
+            text-shadow: 0 0 1px #ffffff, 0 1px 2px rgba(0,0,0,0.9);
+            position: relative;
+            top: -0.5px; /* Penyesuaian mikro agar benar-benar senter di tengah teks */
         }
     </style>
 </head>
