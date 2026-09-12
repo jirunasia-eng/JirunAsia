@@ -86,7 +86,7 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.8); 
         }
 
-        /* Badge Poin (Bintang & Angka): Bulat biru diperkecil, angka disesuaikan */
+        /* Badge Poin (Bintang & Angka) */
         .slot-star-number-group {
             position: absolute; top: 5px; left: 5px;
             z-index: 10; height: 14px;
@@ -118,20 +118,20 @@
             line-height: 1;
         }
 
-        /* Icon Mikrofon Baru: Bulat garis hitam, coretan slash putih kecil */
+        /* Icon Mikrofon Baru */
         .mic-icon-bottom-right {
             position: absolute; bottom: 5px; right: 5px;
             z-index: 10; width: 18px; height: 18px;
             background-color: rgba(0, 0, 0, 0.7); 
-            border-radius: 50%; /* Diubah menjadi bulat */
+            border-radius: 50%; 
             display: none; align-items: center; justify-content: center;
-            border: 1px solid #000000; /* Garis hitam */
+            border: 1px solid #000000; 
         }
         .mic-icon-bottom-right svg {
             width: 10px; height: 10px; fill: #ffffff;
         }
 
-        /* Kotak Host: Tinggi 312px, margin kanan 6px */
+        /* Kotak Host */
         .host-box {
             width: 195px; height: 312px;
             border: 1px solid rgba(255, 255, 255, 0.8); 
@@ -192,28 +192,29 @@
             border: 1px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus disesuaikan */
+        /* Label Nama Target & Icon Plus: Dibuat pas/compact (tidak terlalu panjang memenuhi kotak) */
         .slot-name-bottom {
-            position: absolute; bottom: 5px; left: 5px; right: 26px; /* Diberi ruang agar tidak menumpuk dengan icon mic */
+            position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
             font-size: 9px; font-weight: bold; padding: 2px 6px; 
             border-radius: 10px; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex; align-items: center; justify-content: space-between; gap: 4px;
+            display: inline-flex; align-items: center; gap: 3px;
         }
         .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; }
         
-        /* Penyesuaian Icon Plus di sebelah nama target */
+        /* Icon plus disamakan karakternya persis seperti teks "Permintaan" */
         .slot-name-bottom .plus-icon-large { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 15px; 
+            font-size: 14px; 
             font-weight: 700; 
             color: #b0b0b0; 
-            line-height: 1; 
-            transform: scaleY(1.2);
+            line-height: 0.7; 
+            transform: scaleY(1.3);
             display: inline-block;
             flex-shrink: 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
     </style>
 </head>
@@ -235,7 +236,6 @@
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
                             <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                            <!-- Garis coretan putih kecil menyoret mikrofon -->
                             <line x1="3" y1="3" x2="21" y2="21" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
                         </svg>
                     </div>
