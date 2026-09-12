@@ -77,7 +77,6 @@
             display: inline-block;
         }
 
-        /* Teks Permintaan ukuran besar dengan warna abu-abu */
         .box .label { 
             font-family: Arial, sans-serif;
             font-size: 14px; 
@@ -87,36 +86,42 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.9); 
         }
 
-        /* Badge Poin (Bintang & Angka) */
+        /* Badge Poin (Bintang, Angka, & Icon Gift) */
         .slot-star-number-group {
             position: absolute; top: 5px; left: 5px;
-            z-index: 10; height: 14px;
-            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10; height: 18px;
+            background-color: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             display: none; align-items: center;
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
             overflow: hidden;
-            padding-right: 4px;
+            padding-right: 5px;
+            gap: 3px;
         }
 
         .slot-star-circle-small {
-            width: 10px; height: 10px;
+            width: 12px; height: 12px;
             background-color: #1890ff;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            margin-left: 2px;
+            margin-left: 3px;
         }
 
         .slot-star-circle-small .star-icon {
-            font-size: 5px; color: #ffffff; line-height: 1;
+            font-size: 6px; color: #ffffff; line-height: 1;
         }
 
         .slot-number-text {
-            padding: 0 3px;
             color: #ffffff;
-            font-size: 8px; font-weight: bold;
+            font-size: 9px; font-weight: bold;
             line-height: 1;
+        }
+
+        .slot-gift-icon-small {
+            width: 14px; height: 14px;
+            object-fit: contain;
+            display: none;
         }
 
         /* Icon Mikrofon Baru */
@@ -185,7 +190,6 @@
             z-index: 5; background: transparent;
         }
         
-        /* Foto target */
         .slot-avatar { 
             width: 72px; height: 72px; 
             border-radius: 50%; 
@@ -194,7 +198,6 @@
             border: 2px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus ✚ */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
@@ -237,8 +240,12 @@
 
             <!-- Kolom Kiri (Slot 1 & 2) -->
             <div class="side-column">
-                <div class="box" id="slot-1">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
+                <div class="box" id="slot-1" data-points="0" data-gift="">
+                    <div class="slot-star-number-group">
+                        <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
+                        <div class="slot-number-text">0</div>
+                        <img class="slot-gift-icon-small" alt="Gift">
+                    </div>
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -248,8 +255,12 @@
                     </div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
-                <div class="box" id="slot-2">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
+                <div class="box" id="slot-2" data-points="0" data-gift="">
+                    <div class="slot-star-number-group">
+                        <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
+                        <div class="slot-number-text">0</div>
+                        <img class="slot-gift-icon-small" alt="Gift">
+                    </div>
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -263,8 +274,12 @@
 
             <!-- Kolom Kanan (Slot 3 & 4) -->
             <div class="side-column">
-                <div class="box" id="slot-3">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
+                <div class="box" id="slot-3" data-points="0" data-gift="">
+                    <div class="slot-star-number-group">
+                        <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
+                        <div class="slot-number-text">0</div>
+                        <img class="slot-gift-icon-small" alt="Gift">
+                    </div>
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -274,8 +289,12 @@
                     </div>
                     <span class="plus">+</span><span class="label">Permintaan</span>
                 </div>
-                <div class="box" id="slot-4">
-                    <div class="slot-star-number-group"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
+                <div class="box" id="slot-4" data-points="0" data-gift="">
+                    <div class="slot-star-number-group">
+                        <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
+                        <div class="slot-number-text">0</div>
+                        <img class="slot-gift-icon-small" alt="Gift">
+                    </div>
                     <div class="mic-icon-bottom-right">
                         <svg viewBox="0 0 24 24">
                             <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
@@ -299,24 +318,6 @@
             bgVideo.style.display = 'none';
             bgVideo.src = '';
         };
-
-        function parsePointsFromName(filename) {
-            if (!filename) return 0;
-            const regex = /([\d.,]+)([km])?/i;
-            const match = filename.match(regex);
-            if (!match) return 0;
-            
-            let numStr = match[1].replace(/\./g, '').replace(/,/g, '.');
-            const modifier = match[2] ? match[2].toLowerCase() : '';
-            
-            let number = parseFloat(numStr);
-            if (isNaN(number)) return 0;
-
-            if (modifier === 'k') number *= 1_000;
-            else if (modifier === 'm') number *= 1_000_000;
-
-            return Math.round(number);
-        }
 
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
@@ -365,22 +366,54 @@
                 `;
 
                 if (data.clear) {
+                    slotEl.dataset.points = "0";
+                    slotEl.dataset.gift = "";
                     slotEl.classList.remove('active-slot');
                     slotEl.innerHTML = `
-                        <div class="slot-star-number-group" style="display: none;"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">0</div></div>
+                        <div class="slot-star-number-group" style="display: none;">
+                            <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
+                            <div class="slot-number-text">0</div>
+                            <img class="slot-gift-icon-small" alt="Gift">
+                        </div>
                         <div class="mic-icon-bottom-right" style="display: none;">${micSvgHTML}</div>
                         <span class="plus">+</span><span class="label">Permintaan</span>
                     `;
                 } else {
-                    const calculatedPoints = parsePointsFromName(data.name || '');
-
+                    slotEl.dataset.points = "0";
+                    slotEl.dataset.gift = "";
                     slotEl.classList.add('active-slot');
                     slotEl.innerHTML = `
-                        <div class="slot-star-number-group" style="display: flex;"><div class="slot-star-circle-small"><span class="star-icon">★</span></div><div class="slot-number-text">${calculatedPoints}</div></div>
+                        <div class="slot-star-number-group" style="display: flex;">
+                            <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
+                            <div class="slot-number-text">0</div>
+                            <img class="slot-gift-icon-small" alt="Gift" style="display: none;">
+                        </div>
                         <div class="mic-icon-bottom-right" style="display: flex;">${micSvgHTML}</div>
                         <div class="slot-content"><img src="${data.photo}" class="slot-avatar" alt="Avatar"></div>
                         <div class="slot-name-bottom"><span class="name-text">${data.name}</span><span class="plus-icon-large">✚</span></div>
                     `;
+                }
+            }
+
+            if (type === 'ADD_POINTS_TO_SLOT') {
+                const slotEl = document.getElementById(`slot-${data.slot}`);
+                if (!slotEl) return;
+
+                let currentPoints = parseInt(slotEl.dataset.points || "0") + parseInt(data.addPoints || 0);
+                slotEl.dataset.points = currentPoints;
+                if (data.giftIcon) {
+                    slotEl.dataset.gift = data.giftIcon;
+                }
+
+                const numberText = slotEl.querySelector('.slot-number-text');
+                const groupEl = slotEl.querySelector('.slot-star-number-group');
+                const giftImgEl = slotEl.querySelector('.slot-gift-icon-small');
+
+                if (numberText) numberText.innerText = currentPoints.toLocaleString('id-ID');
+                if (groupEl) groupEl.style.display = 'flex';
+                if (giftImgEl && slotEl.dataset.gift) {
+                    giftImgEl.src = slotEl.dataset.gift;
+                    giftImgEl.style.display = 'inline-block';
                 }
             }
         };
