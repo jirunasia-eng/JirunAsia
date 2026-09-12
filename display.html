@@ -118,7 +118,7 @@
             line-height: 1;
         }
 
-        /* Icon Mikrofon Baru: Digeser sedikit ke atas (bottom diubah dari 5px ke 7px) */
+        /* Icon Mikrofon Baru */
         .mic-icon-bottom-right {
             position: absolute; bottom: 7px; right: 5px;
             z-index: 10; width: 18px; height: 18px;
@@ -184,7 +184,7 @@
             z-index: 5; background: transparent;
         }
         
-        /* Foto target diperbesar (72px) */
+        /* Foto target */
         .slot-avatar { 
             width: 72px; height: 72px; 
             border-radius: 50%; 
@@ -193,7 +193,7 @@
             border: 2px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus: Menggunakan Flexbox dengan align-items center murni agar posisinya pas di tengah vertikal */
+        /* Label Nama Target & Icon Plus */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
@@ -203,9 +203,12 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             display: inline-flex; align-items: center; gap: 4px;
         }
-        .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; line-height: 1; }
+        .slot-name-bottom .name-text { 
+            overflow: hidden; text-overflow: ellipsis; line-height: 1; 
+            display: inline-flex; align-items: center; 
+        }
         
-        /* Icon plus diselaraskan agar pas di tengah secara vertikal, tebal, dan proporsional */
+        /* Icon plus diselaraskan tepat di tengah secara vertikal */
         .slot-name-bottom .plus-icon-large { 
             font-family: 'Cormorant Garamond', serif;
             font-size: 15px; 
@@ -218,7 +221,7 @@
             flex-shrink: 0;
             text-shadow: 0 0 1px #ffffff, 0 1px 2px rgba(0,0,0,0.9);
             position: relative;
-            top: -0.5px; /* Penyesuaian mikro agar benar-benar senter di tengah teks */
+            top: -1px; 
         }
     </style>
 </head>
