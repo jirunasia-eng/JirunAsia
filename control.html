@@ -76,16 +76,12 @@
 
         <!-- Input Target Permintaan -->
         <div class="form-group">
-            <label for="targetSlot">Pilih Slot Target (1 - 8):</label>
+            <label for="targetSlot">Pilih Slot Target (1 - 4):</label>
             <select id="targetSlot">
                 <option value="1">Kotak 1</option>
                 <option value="2">Kotak 2</option>
                 <option value="3">Kotak 3</option>
                 <option value="4">Kotak 4</option>
-                <option value="5">Kotak 5</option>
-                <option value="6">Kotak 6</option>
-                <option value="7">Kotak 7</option>
-                <option value="8">Kotak 8</option>
             </select>
 
             <label style="margin-top:10px;">Username / Link TikTok Target:</label>
@@ -232,7 +228,6 @@
             if (!pendingTargetData.username) return;
             const slotId = document.getElementById('targetSlot').value;
             
-            // Ambil nama asli/username dan tambahkan poin manual ke format teks agar terbaca parser display
             let baseName = pendingTargetData.name;
             let manualVal = parseInt(manualPointInput.value) || 0;
             
