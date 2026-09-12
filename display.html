@@ -184,16 +184,16 @@
             z-index: 5; background: transparent;
         }
         
-        /* Foto target dibuat lebih besar (dari 48px ke 60px) */
+        /* Foto target diperbesar lagi menjadi 72px agar lebih jelas */
         .slot-avatar { 
-            width: 60px; height: 60px; 
+            width: 72px; height: 72px; 
             border-radius: 50%; 
             object-fit: cover; 
             margin-bottom: 2px; 
-            border: 1.5px solid #fff; 
+            border: 2px solid #fff; 
         }
         
-        /* Label Nama Target & Icon Plus disesuaikan posisinya agar lebih presisi dan tebal */
+        /* Label Nama Target & Icon Plus disesuaikan agar posisinya pas di tengah secara vertikal & horizontal */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
@@ -201,21 +201,23 @@
             border-radius: 10px; 
             max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            display: inline-flex; align-items: center; gap: 3px;
+            display: inline-flex; align-items: center; gap: 4px;
         }
-        .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; }
+        .slot-name-bottom .name-text { overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
         
-        /* Icon plus dipertebal dan disesuaikan stylenya agar konsisten */
+        /* Icon plus dibuat jauh lebih tebal (menggunakan font-weight 900 / text-stroke atau penyesuaian skala) dan posisinya diselaraskan ke tengah */
         .slot-name-bottom .plus-icon-large { 
             font-family: 'Cormorant Garamond', serif;
-            font-size: 15px; 
-            font-weight: 700; 
-            color: #ffffff; /* Dibuat putih terang agar lebih jelas dan tegas */
-            line-height: 0.7; 
-            transform: scaleY(1.3);
-            display: inline-block;
+            font-size: 16px; 
+            font-weight: 900; 
+            color: #ffffff; 
+            line-height: 1; 
+            transform: scaleY(1.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+            text-shadow: 0 0 1px #ffffff, 0 1px 2px rgba(0,0,0,0.9); /* Efek tebal menyala */
         }
     </style>
 </head>
