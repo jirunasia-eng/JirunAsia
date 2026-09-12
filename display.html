@@ -326,6 +326,21 @@
         const channel = new BroadcastChannel('live_control_channel');
         const bgVideo = document.getElementById('bgVideoLayer');
 
+        // Database Gift Resmi yang Sinkron
+        const giftDatabase = {
+            "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
+            "Antar Bintang": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp",
+            "Dragon Flame": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/89b4d1d93c1cc614e3a0903ac7a94e0c~tplv-obj.webp",
+            "Fire Phoenix": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/bfb8425a7e8fa03f9fec05a973a4a506.png~tplv-obj.webp",
+            "Kota Masa Depan": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/291de897e4a8c3b72c358a9734c5b7d8.png~tplv-obj.webp",
+            "Legend Marcellus": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp",
+            "Pegasus": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp",
+            "Red Lightning": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/e7ce188da898772f18aaffe49a7bd7db~tplv-obj.webp",
+            "Singa": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp",
+            "Thunder Falcon": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/26f3fbcda383e6093a19b8e7351a164c~tplv-obj.webp",
+            "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
+        };
+
         bgVideo.onended = () => {
             bgVideo.style.display = 'none';
             bgVideo.src = '';
@@ -344,7 +359,6 @@
                 str = str.slice(0, -1);
             }
 
-            // Bersihkan titik ribuan jika formatnya menggunakan titik (misal 42.999)
             if (str.includes('.')) {
                 let parts = str.split('.');
                 if (parts.length > 1 && parts[parts.length - 1].length === 3) {
@@ -462,8 +476,14 @@
                 if (numberText) numberText.innerText = formatDisplayPoints(currentPoints);
                 if (groupEl) groupEl.style.display = 'flex';
 
-                if (giftPopup && data.giftIcon) {
-                    giftPopup.src = data.giftIcon;
+                // Ambil URL gambar berdasarkan nama gift yang dikirim atau langsung dari database yang sesuai
+                let resolvedGiftIcon = data.giftIcon;
+                if (data.giftName && giftDatabase[data.giftName]) {
+                    resolvedGiftIcon = giftDatabase[data.giftName];
+                }
+
+                if (giftPopup && resolvedGiftIcon) {
+                    giftPopup.src = resolvedGiftIcon;
                     giftPopup.style.display = 'block';
                     giftPopup.style.animation = 'none';
                     void giftPopup.offsetWidth; 
