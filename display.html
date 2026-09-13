@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Paling Bawah, Berputar Berulang-ulang / Loop terus) */
+        /* 1. Layer Video Host (Berputar Berulang-ulang / Loop terus) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Animasi Latar Belakang (Di atas Host, Putar 1 Kali, pakai blend-mode agar Host tetap nampak) */
+        /* 2. Layer Video Upload Latar Belakang (Hanya 1 Kali Putar / Non-Loop) */
         .upload-video-layer {
             position: absolute;
             top: 0;
@@ -49,12 +49,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 2; 
+            z-index: 2; /* Berada di atas video host, tapi di bawah kotak/konten */
             display: none;
             background-color: transparent;
-            /* Blend mode 'screen' otomatis membuat background hitam animasi menjadi transparan, 
-               sehingga Video Host di layer 1 tetap terlihat di balik animasi tersebut. */
-            mix-blend-mode: screen; 
         }
 
         .main-container {
@@ -223,10 +220,10 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Layer Video Host (Paling Bawah, Looping Berulang Terus) -->
+        <!-- 1. Layer Video Host (Looping Berulang Terus) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Animasi Latar Belakang (Putar 1 Kali, Semi-transparan/Blend dengan Host) -->
+        <!-- 2. Layer Video Upload Latar Belakang (Putar 1 Kali Saja / Non-Loop) -->
         <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
@@ -298,9 +295,12 @@
             "Antar Bintang": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp",
             "Dragon Flame": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/89b4d1d93c1cc614e3a0903ac7a94e0c~tplv-obj.webp",
             "Fire Phoenix": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/bfb8425a7e8fa03f9fec05a973a4a506.png~tplv-obj.webp",
-            "Kota Masa Depan": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/291de897e4a8c3b72c358a9734c5b7d8.png~tplv-obj.webp",
-            "Legend Marcellus": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp",
-            "Pegasus": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp",
+            
+            /* Perbaikan URL Gift yang Tertukar */
+            "Kota Masa Depan": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/291de897e4a8c3b72c358a9734c5b7d8.png~tplv-obj.webp", /* 6.000 Poin */
+            "Legend Marcellus": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp", /* 42.999 Poin */
+            "Pegasus": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp", /* 42.999 Poin */
+
             "Red Lightning": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/e7ce188da898772f18aaffe49a7bd7db~tplv-obj.webp",
             "Singa": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp",
             "Thunder Falcon": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/26f3fbcda383e6093a19b8e7351a164c~tplv-obj.webp",
@@ -336,17 +336,17 @@
             return total.toLocaleString('id-ID');
         }
 
-        // Event saat video upload selesai diputar 1 kali
+        // Event saat video upload (latar belakang) selesai diputar 1 kali
         uploadVideo.onended = () => {
             uploadVideo.pause();
             uploadVideo.currentTime = 0;
-            uploadVideo.style.display = 'none'; // Sembunyikan animasi setelah selesai, video host tetap jalan
+            uploadVideo.style.display = 'none'; // Sembunyikan setelah selesai
         };
 
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
 
-            // 1. UPDATE_HOST_VIDEO: Video Host Terus Berputar (Looping)
+            // 1. UPDATE_HOST_VIDEO: Video Host Berputar Berulang-ulang & Tidak Hilang walau ada upload video
             if (type === 'UPDATE_HOST_VIDEO') {
                 bgVideo.pause();
                 bgVideo.currentTime = 0;
@@ -360,7 +360,7 @@
                 });
             }
 
-            // 2. UPDATE_GS_VIDEO: Video Animasi Latar Belakang (Bersuara, Putar 1 Kali, Ditumpuk di atas Host dengan Blend Mode)
+            // 2. UPDATE_GS_VIDEO: Video Upload Latar Belakang (Bersuara, Hanya 1 kali putar sampai habis)
             if (type === 'UPDATE_GS_VIDEO') {
                 uploadVideo.pause();
                 uploadVideo.currentTime = 0;
@@ -418,7 +418,15 @@
                 const slotEl = document.getElementById(`slot-${data.slot}`);
                 if (!slotEl) return;
 
-                const addedValue = parseFlexiblePoints(data.addPoints);
+                // Jika giftName dikirim, pastikan poin otomatis mengikuti standar jika data.addPoints kosong/tidak sesuai
+                let pointToAdd = data.addPoints;
+                if (data.giftName === "Kota Masa Depan" && (!pointToAdd || parseFlexiblePoints(pointToAdd) === 0)) {
+                    pointToAdd = 6000;
+                } else if ((data.giftName === "Legend Marcellus" || data.giftName === "Pegasus") && (!pointToAdd || parseFlexiblePoints(pointToAdd) === 0)) {
+                    pointToAdd = 42999;
+                }
+
+                const addedValue = parseFlexiblePoints(pointToAdd);
                 let currentPoints = parseInt(slotEl.dataset.points || "0") + addedValue;
                 slotEl.dataset.points = currentPoints;
 
