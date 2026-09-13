@@ -181,16 +181,17 @@
             100% { opacity: 0; transform: scale(0.8) translateY(-15px); }
         }
 
+        /* Ikon mikrofon: SEJAJAR dengan badge nama (garis tengah sama) */
         .mic-icon-bottom-right {
-            position: absolute; bottom: 6px; right: 6px;
-            z-index: 10; width: 22px; height: 22px;
+            position: absolute; bottom: 5px; right: 6px;
+            z-index: 10; width: 20px; height: 20px;
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 50%;
             display: none; align-items: center; justify-content: center;
             border: 1px solid #000000;
         }
         .mic-icon-bottom-right svg {
-            width: 13px; height: 13px; fill: #ffffff;
+            width: 12px; height: 12px; fill: #ffffff;
         }
 
         .slot-content {
@@ -208,36 +209,37 @@
             border: none;
         }
 
-        /* Badge nama: SEGI PANJANG, posisi KIRI BAWAH */
+        /* Badge nama: SEGI PANJANG UJUNG SETENGAH BULAT (kapsul), kiri bawah */
         .slot-name-bottom {
             position: absolute; bottom: 6px; left: 6px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
-            font-size: 10px; font-weight: bold; padding: 4px 8px;
-            border-radius: 4px;
+            font-size: 10px; font-weight: bold; padding: 4px 7px 4px 10px;
+            border-radius: 999px;
             max-width: 85%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            display: inline-flex; align-items: center; gap: 6px;
+            display: inline-flex; align-items: center; gap: 5px;
         }
         .slot-name-bottom .name-text {
             overflow: hidden; text-overflow: ellipsis; line-height: 1;
             display: inline-flex; align-items: center;
         }
 
-        /* Ikon + di ujung nama: tanda + BIASA warna PUTIH,
-           lingkaran ABU-ABU SEDANG, TANPA garis putih */
+        /* Ikon + : lingkaran ABU KECIL, tanda + PUTIH PAS DI TENGAH */
         .slot-name-bottom .plus-icon-large {
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 9px;
             font-weight: bold;
             color: #ffffff;
             background-color: #9e9e9e;
             border: none;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 14px;
+            height: 14px;
             line-height: 1;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
+            padding: 0;
             flex-shrink: 0;
             box-sizing: border-box;
         }
