@@ -292,19 +292,16 @@
             let str = String(val).trim().toUpperCase();
             let multiplier = 1;
 
-            if (str.endsWith('K')) { multiplier = 1000; str = str.slice(0, -1); }
-            else if (str.endsWith('M')) { multiplier = 1000000; str = str.slice(0, -1); }
-
-            if (str.includes('.')) {
-                let parts = str.split('.');
-                if (parts.length > 1 && parts[parts.length - 1].length === 3) {
-                    str = str.replace(/\./g, '');
-                } else {
-                    str = str.replace(',', '.');
-                }
-            } else if (str.includes(',')) {
-                str = str.replace(',', '.');
+            if (str.endsWith('K')) { 
+                multiplier = 1000; 
+                str = str.slice(0, -1); 
+            } else if (str.endsWith('M')) { 
+                multiplier = 1000000; 
+                str = str.slice(0, -1); 
             }
+
+            // Ubah koma menjadi titik agar bisa dibaca oleh parseFloat JavaScript
+            str = str.replace(',', '.');
 
             let num = parseFloat(str);
             return isNaN(num) ? 0 : Math.round(num * multiplier);
@@ -313,10 +310,10 @@
         function formatDisplayPoints(total) {
             if (total >= 1000000) {
                 let mVal = total / 1000000;
-                return (mVal % 1 === 0 ? mVal.toFixed(0) : mVal.toFixed(2).replace(/\.?0+$/, '')) + 'M';
+                return mVal.toFixed(1).replace('.', ',') + 'M';
             } else if (total >= 1000) {
                 let kVal = total / 1000;
-                return (kVal % 1 === 0 ? kVal.toFixed(0) : kVal.toFixed(1).replace(/\.?0+$/, '')) + 'K';
+                return kVal.toFixed(1).replace('.', ',') + 'K';
             }
             return total.toLocaleString('id-ID');
         }
