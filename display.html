@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Paling Belakang, Berputar Berulang-ulang) */
+        /* 1. Layer Video Host (Paling Belakang) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Animasi (Di depan layar, background hitam tembus ke video host) */
+        /* 2. Layer Video Animasi (Di Depan, Diberi Opasitas Agar Host di Belakang Tetap Terlihat) */
         .upload-video-layer {
             position: absolute;
             top: 0;
@@ -53,7 +53,11 @@
             display: none;
             background: transparent;
             pointer-events: none; 
-            mix-blend-mode: screen; 
+            /* opacity diatur 0.75 (75%) agar animasi tetap tajam tapi video host di belakangnya 
+               tetap terlihat menembus latar belakang hitam animasi tersebut. 
+               Silakan ubah angka 0.75 ke 0.6 atau 0.8 sesuai selera Anda. */
+            opacity: 0.75; 
+            mix-blend-mode: lighten; /* Membantu menyatukan video animasi berlatar hitam dengan host di belakang */
         }
 
         .main-container {
@@ -76,7 +80,7 @@
             gap: 8px; 
         }
 
-        /* Ukuran Kotak 1-8 (Tanpa garis putih) */
+        /* Ukuran Kotak 1-8 */
         .box {
             width: 115px; 
             height: 112px; 
@@ -226,7 +230,7 @@
         <!-- 1. Layer Video Host (Paling Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Animasi (Di Depan Layar, Background Hitam Tembus ke Host) -->
+        <!-- 2. Layer Video Animasi (Di Depan dengan Transparansi & Lighten) -->
         <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
