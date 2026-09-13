@@ -208,15 +208,13 @@
             border: none;
         }
 
-        /* Badge nama: dipaskan — terpusat di bawah kotak, isi rapi */
+        /* Badge nama: SEGI PANJANG, posisi KIRI BAWAH */
         .slot-name-bottom {
-            position: absolute; bottom: 8px; left: 50%;
-            transform: translateX(-50%);
+            position: absolute; bottom: 6px; left: 6px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
-            font-size: 10px; font-weight: bold; padding: 3px 4px 3px 10px;
-            border-radius: 20px;
-            max-width: 88%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 10px; font-weight: bold; padding: 4px 8px;
+            border-radius: 4px;
+            max-width: 85%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             display: inline-flex; align-items: center; gap: 6px;
         }
         .slot-name-bottom .name-text {
@@ -224,17 +222,18 @@
             display: inline-flex; align-items: center;
         }
 
-        /* Ikon ✚ di ujung nama: lingkaran ABU + ikon BIRU + garis putih agak tebal */
+        /* Ikon + di ujung nama: tanda + BIASA warna PUTIH,
+           lingkaran ABU-ABU SEDANG, TANPA garis putih */
         .slot-name-bottom .plus-icon-large {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            color: #1890ff;
-            background-color: rgba(160, 160, 160, 0.95);
-            border: 2.5px solid #ffffff;
+            color: #ffffff;
+            background-color: #9e9e9e;
+            border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             line-height: 1;
             display: inline-flex;
             align-items: center;
@@ -579,7 +578,7 @@
                         <img class="gift-popup-effect" alt="Gift Popup">
                         <div class="mic-icon-bottom-right" style="display: flex;">${micSvgHTML}</div>
                         <div class="slot-content"><img src="${data.photo}" class="slot-avatar" alt="Avatar"></div>
-                        <div class="slot-name-bottom"><span class="name-text">${processedName}</span><span class="plus-icon-large">✚</span></div>
+                        <div class="slot-name-bottom"><span class="name-text">${processedName}</span><span class="plus-icon-large">+</span></div>
                     `;
                 }
             }
