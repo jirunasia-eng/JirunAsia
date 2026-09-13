@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Animasi (Di depan layar, warna asli pekat/tajam, video host di belakang tetap nampak) */
+        /* 2. Layer Video Animasi (Di depan layar, warna host di belakang tetap kelihatan) */
         .upload-video-layer {
             position: absolute;
             top: 0;
@@ -53,6 +53,7 @@
             display: none;
             background: transparent;
             pointer-events: none; /* Supaya klik mouse tetap tembus ke elemen UI di atasnya */
+            mix-blend-mode: screen; /* Membuat warna hitam video animasi transparan agar video host kelihatan */
         }
 
         .main-container {
@@ -75,11 +76,11 @@
             gap: 8px; 
         }
 
-        /* Ukuran Kotak 1-8 (Garis putih sudah dihilangkan) */
+        /* Ukuran Kotak 1-8 (Tanpa garis putih) */
         .box {
             width: 115px; 
             height: 112px; 
-            border: none; /* Garis putih dihapus */
+            border: none; 
             border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-color: rgba(20, 20, 20, 0.85);
@@ -161,7 +162,7 @@
             100% { opacity: 0; transform: scale(0.8) translateY(-15px); }
         }
 
-        /* Icon Mikrofon (Sejajar dengan barisan nama target) */
+        /* Icon Mikrofon */
         .mic-icon-bottom-right {
             position: absolute; bottom: 5px; right: 5px;
             z-index: 10; width: 18px; height: 18px;
@@ -225,7 +226,7 @@
         <!-- 1. Layer Video Host (Paling Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Animasi (Di Depan Layar, Warna Asli Tetap Tajam & Pekat) -->
+        <!-- 2. Layer Video Animasi (Di Depan Layar dengan Mix Blend Mode) -->
         <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
