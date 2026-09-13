@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Animasi (Di depan layar, warna host di belakang tetap kelihatan) */
+        /* 2. Layer Video Animasi (Di depan layar, background hitam tembus ke video host) */
         .upload-video-layer {
             position: absolute;
             top: 0;
@@ -52,8 +52,8 @@
             z-index: 2; 
             display: none;
             background: transparent;
-            pointer-events: none; /* Supaya klik mouse tetap tembus ke elemen UI di atasnya */
-            mix-blend-mode: screen; /* Membuat warna hitam video animasi transparan agar video host kelihatan */
+            pointer-events: none; 
+            mix-blend-mode: screen; 
         }
 
         .main-container {
@@ -64,7 +64,7 @@
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start;
-            z-index: 5; /* Berada di atas semua video */
+            z-index: 5; 
             padding: 0 12px;
         }
 
@@ -226,7 +226,7 @@
         <!-- 1. Layer Video Host (Paling Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Animasi (Di Depan Layar dengan Mix Blend Mode) -->
+        <!-- 2. Layer Video Animasi (Di Depan Layar, Background Hitam Tembus ke Host) -->
         <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
