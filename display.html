@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Berputar Berulang-ulang / Loop terus) */
+        /* 1. Layer Video Host (Paling Belakang, Berputar Berulang-ulang) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Upload Latar Belakang (Hanya 1 Kali Putar / Non-Loop) */
+        /* 2. Layer Video Upload Animasi (Di atas Host, dibuat transparan agar video host tetap nampak bersamaan) */
         .upload-video-layer {
             position: absolute;
             top: 0;
@@ -49,9 +49,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 2; /* Berada di atas video host, tapi di bawah kotak/konten */
+            z-index: 2; 
             display: none;
-            background-color: transparent;
+            background: transparent; /* Transparan agar video host di bawahnya tetap terlihat */
+            mix-blend-mode: screen;  /* Membantu menyatukan latar belakang hitam video animasi dengan video host */
         }
 
         .main-container {
@@ -160,9 +161,9 @@
             100% { opacity: 0; transform: scale(0.8) translateY(-15px); }
         }
 
-        /* Icon Mikrofon */
+        /* Icon Mikrofon (Digeser lebih ke bawah agar sejajar dengan barisan nama target) */
         .mic-icon-bottom-right {
-            position: absolute; bottom: 7px; right: 5px;
+            position: absolute; bottom: 5px; right: 5px;
             z-index: 10; width: 18px; height: 18px;
             background-color: rgba(0, 0, 0, 0.7); 
             border-radius: 50%; 
@@ -187,12 +188,13 @@
             border: 2px solid #fff; 
         }
         
+        /* Barisan Nama Target (Disesuaikan agar ada ruang untuk ikon mikrofon di sebelah kanan) */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
             font-size: 9px; font-weight: bold; padding: 3px 7px 2px 7px; 
             border-radius: 10px; 
-            max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 68%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border: 1px solid rgba(255, 255, 255, 0.3);
             display: inline-flex; align-items: center; gap: 4px;
         }
@@ -220,10 +222,10 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Layer Video Host (Looping Berulang Terus) -->
+        <!-- 1. Layer Video Host (Looping Berulang Terus di Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Upload Latar Belakang (Putar 1 Kali Saja / Non-Loop) -->
+        <!-- 2. Layer Video Upload Animasi (Diputar 1 kali, transparan/screen agar menyatu dengan video host) -->
         <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
@@ -295,12 +297,9 @@
             "Antar Bintang": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp",
             "Dragon Flame": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/89b4d1d93c1cc614e3a0903ac7a94e0c~tplv-obj.webp",
             "Fire Phoenix": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/bfb8425a7e8fa03f9fec05a973a4a506.png~tplv-obj.webp",
-            
-            /* Perbaikan URL Gift yang Tertukar */
-            "Kota Masa Depan": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/291de897e4a8c3b72c358a9734c5b7d8.png~tplv-obj.webp", /* 6.000 Poin */
-            "Legend Marcellus": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp", /* 42.999 Poin */
-            "Pegasus": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp", /* 42.999 Poin */
-
+            "Kota Masa Depan": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/291de897e4a8c3b72c358a9734c5b7d8.png~tplv-obj.webp",
+            "Legend Marcellus": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp",
+            "Pegasus": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp",
             "Red Lightning": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/e7ce188da898772f18aaffe49a7bd7db~tplv-obj.webp",
             "Singa": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp",
             "Thunder Falcon": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/26f3fbcda383e6093a19b8e7351a164c~tplv-obj.webp",
@@ -336,6 +335,16 @@
             return total.toLocaleString('id-ID');
         }
 
+        // Fungsi untuk mengambil setengah dari karakter nama jika terlalu panjang, lalu ditambahkan titik-titik (...)
+        function formatShortName(name) {
+            if (!name) return "";
+            if (name.length > 8) {
+                let halfLength = Math.ceil(name.length / 2);
+                return name.substring(0, halfLength) + "...";
+            }
+            return name;
+        }
+
         // Event saat video upload (latar belakang) selesai diputar 1 kali
         uploadVideo.onended = () => {
             uploadVideo.pause();
@@ -346,7 +355,7 @@
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
 
-            // 1. UPDATE_HOST_VIDEO: Video Host Berputar Berulang-ulang & Tidak Hilang walau ada upload video
+            // 1. UPDATE_HOST_VIDEO: Video Host Berputar Berulang-ulang
             if (type === 'UPDATE_HOST_VIDEO') {
                 bgVideo.pause();
                 bgVideo.currentTime = 0;
@@ -360,14 +369,14 @@
                 });
             }
 
-            // 2. UPDATE_GS_VIDEO: Video Upload Latar Belakang (Bersuara, Hanya 1 kali putar sampai habis)
+            // 2. UPDATE_GS_VIDEO: Video Upload Animasi (Bersuara, Diputar 1 kali, menyatu dengan video host)
             if (type === 'UPDATE_GS_VIDEO') {
                 uploadVideo.pause();
                 uploadVideo.currentTime = 0;
                 uploadVideo.src = url;
                 uploadVideo.style.display = 'block';
                 uploadVideo.load();
-                uploadVideo.muted = false; // Bersuara
+                uploadVideo.muted = false; 
                 uploadVideo.play().catch(e => {
                     uploadVideo.muted = true;
                     uploadVideo.play();
@@ -401,6 +410,7 @@
                 } else {
                     slotEl.dataset.points = "0";
                     slotEl.classList.add('active-slot');
+                    const processedName = formatShortName(data.name);
                     slotEl.innerHTML = `
                         <div class="slot-star-number-group" style="display: flex;">
                             <div class="slot-star-circle-small"><span class="star-icon">★</span></div>
@@ -409,7 +419,7 @@
                         <img class="gift-popup-effect" alt="Gift Popup">
                         <div class="mic-icon-bottom-right" style="display: flex;">${micSvgHTML}</div>
                         <div class="slot-content"><img src="${data.photo}" class="slot-avatar" alt="Avatar"></div>
-                        <div class="slot-name-bottom"><span class="name-text">${data.name}</span><span class="plus-icon-large">✚</span></div>
+                        <div class="slot-name-bottom"><span class="name-text">${processedName}</span><span class="plus-icon-large">✚</span></div>
                     `;
                 }
             }
@@ -418,7 +428,6 @@
                 const slotEl = document.getElementById(`slot-${data.slot}`);
                 if (!slotEl) return;
 
-                // Jika giftName dikirim, pastikan poin otomatis mengikuti standar jika data.addPoints kosong/tidak sesuai
                 let pointToAdd = data.addPoints;
                 if (data.giftName === "Kota Masa Depan" && (!pointToAdd || parseFlexiblePoints(pointToAdd) === 0)) {
                     pointToAdd = 6000;
