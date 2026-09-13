@@ -291,7 +291,13 @@
         const wrapperContainer = document.getElementById('wrapperContainer');
         const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
 
+        // FIX LAG: chroma key dijalankan di canvas offscreen berukuran ringan,
+        // hasilnya lalu di-upscale ke canvas utama via drawImage (dipercepat GPU)
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
         let animFrameId = null;
+        let chromaRunning = false;
         let targetWidth = 495;
         let targetHeight = 880;
 
@@ -301,8 +307,6 @@
             targetHeight = Math.round(rect.height) || 880;
 
             const dpr = window.devicePixelRatio || 1;
-            // FIX: buffer piksel dibulatkan & transform direset dengan setTransform
-            // agar tidak menumpuk dan ukuran buffer selalu presisi penuh layar
             animCanvas.width = Math.round(targetWidth * dpr);
             animCanvas.height = Math.round(targetHeight * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -310,6 +314,21 @@
         
         window.addEventListener('resize', initCanvasResolution);
         initCanvasResolution();
+
+        // Siapkan offscreen maksimal selebar wrapper (495px) -> loop piksel ringan,
+        // tapi tetap tajam saat di-upscale ke layar HD
+        function setupOffscreen() {
+            const vw = uploadVideoSource.videoWidth || targetWidth;
+            const vh = uploadVideoSource.videoHeight || targetHeight;
+            let w = vw, h = vh;
+            const cap = Math.min(1, targetWidth / w); // hanya mengecil, tidak memperbesar
+            w = Math.max(1, Math.round(w * cap));
+            h = Math.max(1, Math.round(h * cap));
+            offCanvas.width = w;
+            offCanvas.height = h;
+        }
+
+        uploadVideoSource.addEventListener('loadeddata', setupOffscreen);
 
         const giftDatabase = {
             "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
@@ -325,78 +344,103 @@
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
 
-        // FIX UTAMA: chroma key kini memproses SELURUH buffer canvas (device pixel).
-        // Sebelumnya hanya area targetWidth x targetHeight yang diproses, sehingga saat
-        // devicePixelRatio layar > 1, sisi kanan canvas berisi frame mentah berlatar
-        // hitam yang terlihat sebagai "layar hitam di kanan atas".
-        function processChromaKeyAbsolute() {
-            if (uploadVideoSource.readyState >= 2 && !uploadVideoSource.paused && !uploadVideoSource.ended) {
-                const bufW = animCanvas.width;
-                const bufH = animCanvas.height;
+        // Chroma key dengan ambang yang SAMA PERSIS, tapi di buffer ringan (offscreen).
+        // Tidak ada lagi strip hitam, dan tidak ada lagi lag/patah-patah.
+        function processChromaKeyFrame() {
+            // 1) Gambar frame video ke offscreen (ukuran proses ringan)
+            offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+            offCtx.drawImage(uploadVideoSource, 0, 0, offCanvas.width, offCanvas.height);
 
-                // Bersihkan total area canvas dengan warna transparan penuh
-                ctx.clearRect(0, 0, bufW, bufH);
+            // 2) Chroma key di offscreen
+            const frame = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+            const data = frame.data;
+            const len = data.length;
 
-                const vWidth = uploadVideoSource.videoWidth || targetWidth;
-                const vHeight = uploadVideoSource.videoHeight || targetHeight;
+            for (let i = 0; i < len; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
 
-                const scale = Math.max(targetWidth / vWidth, targetHeight / vHeight);
-                const drawW = vWidth * scale;
-                const drawH = vHeight * scale;
-                const drawX = (targetWidth - drawW) / 2;
-                const drawY = (targetHeight - drawH) / 2;
+                const maxVal = Math.max(r, g, b);
 
-                ctx.drawImage(uploadVideoSource, drawX, drawY, drawW, drawH);
-                
-                const frame = ctx.getImageData(0, 0, bufW, bufH);
-                const data = frame.data;
-                const len = data.length;
-
-                for (let i = 0; i < len; i += 4) {
-                    const r = data[i];
-                    const g = data[i + 1];
-                    const b = data[i + 2];
-
-                    const maxVal = Math.max(r, g, b);
-
-                    if (maxVal <= 30) {
-                        data[i + 3] = 0;
-                    } 
-                    else if (maxVal < 70) {
-                        data[i + 3] = Math.round(((maxVal - 30) / 40) * 255);
-                    } 
-                    else {
-                        data[i + 3] = 255;
-                    }
-
-                    if (g > 100 && g > r * 1.3 && g > b * 1.3) {
-                        data[i + 3] = 0;
-                    }
+                if (maxVal <= 30) {
+                    data[i + 3] = 0;
+                } 
+                else if (maxVal < 70) {
+                    data[i + 3] = Math.round(((maxVal - 30) / 40) * 255);
+                } 
+                else {
+                    data[i + 3] = 255;
                 }
 
-                ctx.putImageData(frame, 0, 0);
-                animFrameId = requestAnimationFrame(processChromaKeyAbsolute);
+                if (g > 100 && g > r * 1.3 && g > b * 1.3) {
+                    data[i + 3] = 0;
+                }
+            }
+            offCtx.putImageData(frame, 0, 0);
+
+            // 3) Tampilkan ke canvas utama (resolusi HD/DPR penuh) via drawImage — cepat & mulus
+            ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+            const vWidth = uploadVideoSource.videoWidth || targetWidth;
+            const vHeight = uploadVideoSource.videoHeight || targetHeight;
+
+            const scale = Math.max(targetWidth / vWidth, targetHeight / vHeight);
+            const drawW = vWidth * scale;
+            const drawH = vHeight * scale;
+            const drawX = (targetWidth - drawW) / 2;
+            const drawY = (targetHeight - drawH) / 2;
+
+            ctx.drawImage(offCanvas, drawX, drawY, drawW, drawH);
+        }
+
+        // Loop cerdas: pakai requestVideoFrameCallback bila tersedia (proses hanya
+        // saat frame video baru muncul -> hemat CPU & anti patah-patah),
+        // fallback ke requestAnimationFrame di browser lama.
+        function scheduleNextFrame() {
+            if (!chromaRunning) return;
+            if (typeof uploadVideoSource.requestVideoFrameCallback === 'function') {
+                uploadVideoSource.requestVideoFrameCallback(() => {
+                    if (!chromaRunning) return;
+                    if (uploadVideoSource.readyState >= 2 && !uploadVideoSource.paused && !uploadVideoSource.ended) {
+                        processChromaKeyFrame();
+                    }
+                    scheduleNextFrame();
+                });
+            } else {
+                animFrameId = requestAnimationFrame(() => {
+                    if (!chromaRunning) return;
+                    if (uploadVideoSource.readyState >= 2 && !uploadVideoSource.paused && !uploadVideoSource.ended) {
+                        processChromaKeyFrame();
+                    }
+                    scheduleNextFrame();
+                });
             }
         }
 
-        // FIX: loop render dimulai ulang dengan aman saat play DAN setelah buffering selesai
         function startChromaLoop() {
-            if (animFrameId) cancelAnimationFrame(animFrameId);
-            animFrameId = requestAnimationFrame(processChromaKeyAbsolute);
+            if (chromaRunning) return;
+            chromaRunning = true;
+            if (offCanvas.width === 0) setupOffscreen();
+            scheduleNextFrame();
+        }
+
+        function stopChromaLoop(clearScreen) {
+            chromaRunning = false;
+            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+            if (clearScreen) ctx.clearRect(0, 0, targetWidth, targetHeight);
         }
 
         uploadVideoSource.addEventListener('play', startChromaLoop);
         uploadVideoSource.addEventListener('playing', startChromaLoop);
 
         uploadVideoSource.addEventListener('ended', () => {
-            if (animFrameId) cancelAnimationFrame(animFrameId);
-            animFrameId = null;
+            stopChromaLoop(true);
             uploadVideoSource.pause();
             try { uploadVideoSource.currentTime = 0; } catch (e) {}
-            ctx.clearRect(0, 0, animCanvas.width, animCanvas.height);
         });
 
-        // FIX: helper agar video tetap bisa diputar walau autoplay diblokir browser (fallback mute)
+        // Helper agar video tetap bisa diputar walau autoplay diblokir browser (fallback mute)
         function playVideoSafely(video) {
             video.muted = false;
             const p = video.play();
@@ -451,7 +495,6 @@
             const { type, data, url } = event.data;
 
             if (type === 'UPDATE_HOST_VIDEO') {
-                // FIX: pause & seek dibungkus try-catch agar pemasangan video host tidak gagal
                 try { bgVideo.pause(); } catch (e) {}
                 try { bgVideo.currentTime = 0; } catch (e) {}
                 bgVideo.style.display = 'block';
@@ -461,9 +504,8 @@
             }
 
             if (type === 'UPDATE_GS_VIDEO') {
-                // FIX: hentikan render lama & bersihkan canvas sebelum video animasi baru
-                if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-                ctx.clearRect(0, 0, animCanvas.width, animCanvas.height);
+                // Hentikan render lama & bersihkan canvas sebelum video animasi baru
+                stopChromaLoop(true);
                 try { uploadVideoSource.pause(); } catch (e) {}
                 try { uploadVideoSource.currentTime = 0; } catch (e) {}
                 uploadVideoSource.src = url;
