@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Split Screen (Host & Animasi)</title>
+    <title>TikTok Live - Overlay Tanpa Garis (9:16)</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,49 +28,32 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* Container Split Screen (Dibagi Menjadi 2 Bagian Atas/Bawah atau Sesuai Selera) */
-        .split-screen-container {
+        /* 1. Layer Video Host (Di Belakang - Terlihat setengah/sebagian di area transparan animasi, tanpa garis) */
+        .bg-video-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column; /* Ubah ke 'row' jika ingin kiri-kanan */
-            z-index: 1;
-        }
-
-        /* Bagian Setengah untuk Video Host */
-        .host-section {
-            width: 100%;
-            height: 50%; /* Setengah bagian */
-            position: relative;
-            background-color: #000;
-            overflow: hidden;
-            border-bottom: 2px solid #222; /* Garis pemisah tegas */
-        }
-
-        .bg-video-layer {
-            width: 100%;
-            height: 100%;
             object-fit: cover;
+            z-index: 1; 
             display: none;
-        }
-
-        /* Bagian Setengah untuk Video Animasi */
-        .animation-section {
-            width: 100%;
-            height: 50%; /* Setengah bagian */
-            position: relative;
             background-color: #000;
-            overflow: hidden;
         }
 
+        /* 2. Layer Video Animasi (Di Depan - Latar hitam otomatis dihilangkan dengan mix-blend-mode: screen) */
         .upload-video-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            z-index: 2; 
             display: none;
+            background: transparent;
+            pointer-events: none; 
+            mix-blend-mode: screen; /* Menghilangkan warna hitam pada video animasi dan menampakkan host di belakangnya */
         }
 
         .main-container {
@@ -83,7 +66,6 @@
             align-items: flex-start;
             z-index: 5; 
             padding: 0 12px;
-            pointer-events: none; /* Agar klik tetap tembus ke bawah jika diperlukan */
         }
 
         .side-column { 
@@ -92,7 +74,6 @@
             justify-content: flex-start; 
             align-items: center;
             gap: 8px; 
-            pointer-events: auto;
         }
 
         /* Ukuran Kotak 1-8 */
@@ -242,18 +223,11 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- Struktur Split Screen (Bagi 2 Bagian) -->
-        <div class="split-screen-container">
-            <!-- 1. Bagian Setengah untuk Video Host -->
-            <div class="host-section">
-                <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
-            </div>
-            
-            <!-- 2. Bagian Setengah untuk Video Animasi -->
-            <div class="animation-section">
-                <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
-            </div>
-        </div>
+        <!-- 1. Layer Video Host (Di Belakang) -->
+        <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
+        
+        <!-- 2. Layer Video Animasi (Di Depan - Latar hitam transparan/hilang dengan mix-blend-mode: screen) -->
+        <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
