@@ -41,8 +41,8 @@
             background-color: #000;
         }
 
-        /* 2. Layer Canvas untuk Animasi Video (Warna asli tetap pekat, background hitam otomatis transparan) */
-        .upload-canvas-layer {
+        /* 2. Layer Video Animasi (Di depan layar, warna asli pekat/tajam, video host di belakang tetap nampak) */
+        .upload-video-layer {
             position: absolute;
             top: 0;
             left: 0;
@@ -52,12 +52,7 @@
             z-index: 2; 
             display: none;
             background: transparent;
-            pointer-events: none; /* Supaya klik tembus ke elemen di bawahnya */
-        }
-
-        /* Video tersembunyi sebagai sumber data untuk canvas */
-        #uploadVideoSource {
-            display: none;
+            pointer-events: none; /* Supaya klik mouse tetap tembus ke elemen UI di atasnya */
         }
 
         .main-container {
@@ -68,7 +63,7 @@
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start;
-            z-index: 5; /* Berada di atas video */
+            z-index: 5; /* Berada di atas semua video */
             padding: 0 12px;
         }
 
@@ -80,11 +75,11 @@
             gap: 8px; 
         }
 
-        /* Ukuran Kotak 1-8 */
+        /* Ukuran Kotak 1-8 (Garis putih sudah dihilangkan) */
         .box {
             width: 115px; 
             height: 112px; 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
+            border: none; /* Garis putih dihapus */
             border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-color: rgba(20, 20, 20, 0.85);
@@ -230,10 +225,8 @@
         <!-- 1. Layer Video Host (Paling Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Canvas untuk Animasi Video dengan Warna Asli Pepek & Transparan Otomatis -->
-        <canvas class="upload-canvas-layer" id="uploadCanvasLayer"></canvas>
-        <!-- Sumber Video Tersembunyi -->
-        <video id="uploadVideoSource" playsinline></video>
+        <!-- 2. Layer Video Animasi (Di Depan Layar, Warna Asli Tetap Tajam & Pekat) -->
+        <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
@@ -297,11 +290,7 @@
     <script>
         const channel = new BroadcastChannel('live_control_channel');
         const bgVideo = document.getElementById('bgVideoLayer');       
-        const uploadVideoSource = document.getElementById('uploadVideoSource'); 
-        const uploadCanvas = document.getElementById('uploadCanvasLayer');
-        const canvasCtx = uploadCanvas.getContext('2d', { willReadFrequently: true });
-
-        let animationFrameId = null;
+        const uploadVideo = document.getElementById('uploadVideoLayer'); 
 
         const giftDatabase = {
             "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
@@ -355,54 +344,15 @@
             return name;
         }
 
-        // Fungsi memproses frame video agar latar belakang hitam transparan, warna asli tetap pekat/cerah
-        function processVideoFrame() {
-            if (uploadVideoSource.paused || uploadVideoSource.ended) {
-                cancelAnimationFrame(animationFrameId);
-                uploadCanvas.style.display = 'none';
-                return;
-            }
-
-            if (uploadCanvas.width !== uploadVideoSource.videoWidth || uploadCanvas.height !== uploadVideoSource.videoHeight) {
-                uploadCanvas.width = uploadVideoSource.videoWidth || 495;
-                uploadCanvas.height = uploadVideoSource.videoHeight || 880;
-            }
-
-            canvasCtx.drawImage(uploadVideoSource, 0, 0, uploadCanvas.width, uploadCanvas.height);
-            
-            try {
-                let frameData = canvasCtx.getImageData(0, 0, uploadCanvas.width, uploadCanvas.height);
-                let data = frameData.data;
-
-                // Mengubah warna hitam gelap menjadi transparan tanpa merusak warna cerah objek animasi
-                for (let i = 0; i < data.length; i += 4) {
-                    let r = data[i];
-                    let g = data[i+1];
-                    let b = data[i+2];
-
-                    // Jika pixel berwarna hitam pekat (latar belakang), buat alpha menjadi 0 (transparan)
-                    if (r < 25 && g < 25 && b < 25) {
-                        data[i+3] = 0; 
-                    }
-                }
-                canvasCtx.putImageData(frameData, 0, 0);
-            } catch (e) {
-                // Mencegah error keamanan CORS apabila memuat video lintas domain eksternal
-            }
-
-            animationFrameId = requestAnimationFrame(processVideoFrame);
-        }
-
-        uploadVideoSource.onended = () => {
-            uploadVideoSource.pause();
-            uploadCanvas.style.display = 'none';
-            cancelAnimationFrame(animationFrameId);
+        uploadVideo.onended = () => {
+            uploadVideo.pause();
+            uploadVideo.currentTime = 0;
+            uploadVideo.style.display = 'none';
         };
 
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
 
-            // 1. UPDATE_HOST_VIDEO: Video Host Berputar Berulang-ulang
             if (type === 'UPDATE_HOST_VIDEO') {
                 bgVideo.pause();
                 bgVideo.currentTime = 0;
@@ -416,23 +366,16 @@
                 });
             }
 
-            // 2. UPDATE_GS_VIDEO: Video Upload Animasi (Warna Asli Cerah + Background Hitam Transparan Otomatis)
             if (type === 'UPDATE_GS_VIDEO') {
-                uploadVideoSource.pause();
-                uploadVideoSource.currentTime = 0;
-                uploadVideoSource.src = url;
-                uploadCanvas.style.display = 'block';
-                uploadVideoSource.load();
-                uploadVideoSource.muted = false; 
-                uploadVideoSource.play().then(() => {
-                    cancelAnimationFrame(animationFrameId);
-                    processVideoFrame();
-                }).catch(e => {
-                    uploadVideoSource.muted = true;
-                    uploadVideoSource.play().then(() => {
-                        cancelAnimationFrame(animationFrameId);
-                        processVideoFrame();
-                    });
+                uploadVideo.pause();
+                uploadVideo.currentTime = 0;
+                uploadVideo.src = url;
+                uploadVideo.style.display = 'block';
+                uploadVideo.load();
+                uploadVideo.muted = false; 
+                uploadVideo.play().catch(e => {
+                    uploadVideo.muted = true;
+                    uploadVideo.play();
                 });
             }
 
