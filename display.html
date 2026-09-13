@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - 8 Slots Layout (9:16)</title>
+    <title>TikTok Live - Split Screen (Host & Animasi)</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,35 +28,49 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Di Belakang - Dibuat agak redup/kurang jelas agar video animasi di depan lebih dominan) */
-        .bg-video-layer {
+        /* Container Split Screen (Dibagi Menjadi 2 Bagian Atas/Bawah atau Sesuai Selera) */
+        .split-screen-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            z-index: 1; 
-            display: none;
-            background-color: #000;
-            opacity: 0.55; /* Mengurangi kejelasan video host (semakin kecil angka, semakin redup) */
-            filter: brightness(0.65); /* Membuat video host sedikit gelap tapi tetap terlihat */
+            display: flex;
+            flex-direction: column; /* Ubah ke 'row' jika ingin kiri-kanan */
+            z-index: 1;
         }
 
-        /* 2. Layer Video Animasi (Di Depan - Tampil sangat jelas/normal 100%) */
-        .upload-video-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* Bagian Setengah untuk Video Host */
+        .host-section {
+            width: 100%;
+            height: 50%; /* Setengah bagian */
+            position: relative;
+            background-color: #000;
+            overflow: hidden;
+            border-bottom: 2px solid #222; /* Garis pemisah tegas */
+        }
+
+        .bg-video-layer {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: 2; 
             display: none;
-            background: transparent;
-            pointer-events: none; 
-            opacity: 1; /* Animasi tampil sangat jelas */
-            mix-blend-mode: screen; /* Membuat background hitam animasi menyatu & transparan */
+        }
+
+        /* Bagian Setengah untuk Video Animasi */
+        .animation-section {
+            width: 100%;
+            height: 50%; /* Setengah bagian */
+            position: relative;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        .upload-video-layer {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
         }
 
         .main-container {
@@ -69,6 +83,7 @@
             align-items: flex-start;
             z-index: 5; 
             padding: 0 12px;
+            pointer-events: none; /* Agar klik tetap tembus ke bawah jika diperlukan */
         }
 
         .side-column { 
@@ -77,6 +92,7 @@
             justify-content: flex-start; 
             align-items: center;
             gap: 8px; 
+            pointer-events: auto;
         }
 
         /* Ukuran Kotak 1-8 */
@@ -226,11 +242,18 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Layer Video Host (Di Belakang - Agak Redup/Kurang Jelas) -->
-        <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
-        
-        <!-- 2. Layer Video Animasi (Di Depan - Sangat Jelas 100%) -->
-        <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
+        <!-- Struktur Split Screen (Bagi 2 Bagian) -->
+        <div class="split-screen-container">
+            <!-- 1. Bagian Setengah untuk Video Host -->
+            <div class="host-section">
+                <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
+            </div>
+            
+            <!-- 2. Bagian Setengah untuk Video Animasi -->
+            <div class="animation-section">
+                <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
+            </div>
+        </div>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
