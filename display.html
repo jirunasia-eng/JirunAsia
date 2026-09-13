@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Overlay Tanpa Garis (9:16)</title>
+    <title>TikTok Live - Chroma Key Realtime (Host & Animasi Timbul)</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Di Belakang - Terlihat setengah/sebagian di area transparan animasi, tanpa garis) */
+        /* 1. Layer Video Host (Paling Belakang) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -41,19 +41,15 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Animasi (Di Depan - Latar hitam otomatis dihilangkan dengan mix-blend-mode: screen) */
-        .upload-video-layer {
+        /* 2. Layer Canvas Animasi (Tepat di Atas Host - Chroma Keyed) */
+        .upload-canvas-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
             z-index: 2; 
-            display: none;
-            background: transparent;
-            pointer-events: none; 
-            mix-blend-mode: screen; /* Menghilangkan warna hitam pada video animasi dan menampakkan host di belakangnya */
+            pointer-events: none;
         }
 
         .main-container {
@@ -223,11 +219,14 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Layer Video Host (Di Belakang) -->
+        <!-- 1. Video Host (Tampil di Lapisan Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Animasi (Di Depan - Latar hitam transparan/hilang dengan mix-blend-mode: screen) -->
-        <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
+        <!-- 2. Video Animasi Tersembunyi (Hanya Sebagai Sumber Data Stream) -->
+        <video id="uploadVideoSource" playsinline style="display: none;"></video>
+        
+        <!-- 3. Canvas Overlay (Tempat Rendering Animasi Chroma Key: Hitam Hilang, Animasi Timbul Opaque) -->
+        <canvas class="upload-canvas-layer" id="animationCanvas" width="495" height="880"></canvas>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
@@ -291,7 +290,11 @@
     <script>
         const channel = new BroadcastChannel('live_control_channel');
         const bgVideo = document.getElementById('bgVideoLayer');       
-        const uploadVideo = document.getElementById('uploadVideoLayer'); 
+        const uploadVideoSource = document.getElementById('uploadVideoSource'); 
+        const animCanvas = document.getElementById('animationCanvas');
+        const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
+
+        let animFrameId = null;
 
         const giftDatabase = {
             "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
@@ -305,6 +308,57 @@
             "Singa": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp",
             "Thunder Falcon": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/26f3fbcda383e6093a19b8e7351a164c~tplv-obj.webp",
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
+        };
+
+        // TEKNIK CHROMA KEY REALTIME (Hapus background Hitam / Hijau, jaga Animasi tetap Padat & Timbul)
+        function processChromaKey() {
+            if (!uploadVideoSource.paused && !uploadVideoSource.ended) {
+                ctx.drawImage(uploadVideoSource, 0, 0, animCanvas.width, animCanvas.height);
+                const frame = ctx.getImageData(0, 0, animCanvas.width, animCanvas.height);
+                const data = frame.data;
+                const len = data.length;
+
+                for (let i = 0; i < len; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+
+                    const maxVal = Math.max(r, g, b);
+
+                    // 1. Jika latar HITAM pekat (< 25): Buat 100% Transparan
+                    if (maxVal <= 25) {
+                        data[i + 3] = 0;
+                    } 
+                    // Anti-aliasing / Pinggiran Halus
+                    else if (maxVal < 50) {
+                        data[i + 3] = Math.round(((maxVal - 25) / 25) * 255);
+                    } 
+                    // 2. Jika Objek Animasi Terang (> 50): Jaga 100% PADAT, TAJAM, & TIMBUL (Opaque)
+                    else {
+                        data[i + 3] = 255;
+                    }
+
+                    // 3. Dukungan Ekstra: Jika video berlatar GREEN SCREEN (Hijau Dominan)
+                    if (g > 100 && g > r * 1.35 && g > b * 1.35) {
+                        data[i + 3] = 0;
+                    }
+                }
+
+                ctx.putImageData(frame, 0, 0);
+                animFrameId = requestAnimationFrame(processChromaKey);
+            }
+        }
+
+        uploadVideoSource.onplay = () => {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            processChromaKey();
+        };
+
+        uploadVideoSource.onended = () => {
+            uploadVideoSource.pause();
+            uploadVideoSource.currentTime = 0;
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            ctx.clearRect(0, 0, animCanvas.width, animCanvas.height);
         };
 
         function parseFlexiblePoints(val) {
@@ -345,12 +399,6 @@
             return name;
         }
 
-        uploadVideo.onended = () => {
-            uploadVideo.pause();
-            uploadVideo.currentTime = 0;
-            uploadVideo.style.display = 'none';
-        };
-
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
 
@@ -368,15 +416,14 @@
             }
 
             if (type === 'UPDATE_GS_VIDEO') {
-                uploadVideo.pause();
-                uploadVideo.currentTime = 0;
-                uploadVideo.src = url;
-                uploadVideo.style.display = 'block';
-                uploadVideo.load();
-                uploadVideo.muted = false; 
-                uploadVideo.play().catch(e => {
-                    uploadVideo.muted = true;
-                    uploadVideo.play();
+                uploadVideoSource.pause();
+                uploadVideoSource.currentTime = 0;
+                uploadVideoSource.src = url;
+                uploadVideoSource.load();
+                uploadVideoSource.muted = false; 
+                uploadVideoSource.play().catch(e => {
+                    uploadVideoSource.muted = true;
+                    uploadVideoSource.play();
                 });
             }
 
