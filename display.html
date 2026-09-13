@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Chroma Key Ultimate Fix</title>
+    <title>TikTok Live - Chroma Key Absolute Clean Fix</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -18,7 +18,7 @@
         .wrapper-9-16 {
             width: 495px;
             height: 880px;
-            background-color: #000000;
+            background-color: transparent; /* Diubah transparan total untuk mencegah sisa warna hitam */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Canvas Animasi HD (Anti Pecah & Clear Total) */
+        /* 2. Canvas Animasi HD (Absolute Positioning & Clear Fix) */
         .upload-canvas-layer {
             position: absolute;
             top: 0;
@@ -50,6 +50,7 @@
             height: 100%;
             z-index: 2; 
             pointer-events: none;
+            display: block;
         }
 
         .main-container {
@@ -218,7 +219,7 @@
 </head>
 <body>
 
-    <div class="wrapper-9-16">
+    <div class="wrapper-9-16" id="wrapperContainer">
         <!-- 1. Video Host (Layer Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
@@ -292,18 +293,26 @@
         const bgVideo = document.getElementById('bgVideoLayer');       
         const uploadVideoSource = document.getElementById('uploadVideoSource'); 
         const animCanvas = document.getElementById('animationCanvas');
+        const wrapperContainer = document.getElementById('wrapperContainer');
         const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
 
         let animFrameId = null;
-        const targetWidth = 495;
-        const targetHeight = 880;
+        let targetWidth = 495;
+        let targetHeight = 880;
 
         function initCanvasResolution() {
+            // Sinkronkan ukuran canvas secara presisi dengan ukuran kotak wrapper asli di layar
+            const rect = wrapperContainer.getBoundingClientRect();
+            targetWidth = Math.round(rect.width) || 495;
+            targetHeight = Math.round(rect.height) || 880;
+
             const dpr = window.devicePixelRatio || 1;
             animCanvas.width = targetWidth * dpr;
             animCanvas.height = targetHeight * dpr;
             ctx.scale(dpr, dpr);
         }
+        
+        window.addEventListener('resize', initCanvasResolution);
         initCanvasResolution();
 
         const giftDatabase = {
@@ -320,22 +329,23 @@
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
 
-        // RENDER COVER ALGORITHM (OTOMATIS MENUTUP LAYAR & MENGHILANGKAN SISI HITAM KANAN/KIRI)
-        function processChromaKeyUltimate() {
+        // ABSOLUTE CLEAR & RENDER FIX (Mencegah sisa pixel hitam di sisi kanan canvas)
+        function processChromaKeyAbsolute() {
             if (!uploadVideoSource.paused && !uploadVideoSource.ended) {
+                // Bersihkan total area canvas dengan warna transparan penuh
                 ctx.clearRect(0, 0, targetWidth, targetHeight);
+                ctx.fillStyle = "rgba(0, 0, 0, 0)";
+                ctx.fillRect(0, 0, targetWidth, targetHeight);
 
                 const vWidth = uploadVideoSource.videoWidth || targetWidth;
                 const vHeight = uploadVideoSource.videoHeight || targetHeight;
 
-                // Hitung skala agar video selalu "COVER" (menutupi seluruh kanvas tanpa gepeng/sisa hitam)
                 const scale = Math.max(targetWidth / vWidth, targetHeight / vHeight);
                 const drawW = vWidth * scale;
                 const drawH = vHeight * scale;
                 const drawX = (targetWidth - drawW) / 2;
                 const drawY = (targetHeight - drawH) / 2;
 
-                // Gambar video ke kanvas dengan posisi yang sudah di-center & di-crop pas
                 ctx.drawImage(uploadVideoSource, drawX, drawY, drawW, drawH);
                 
                 const frame = ctx.getImageData(0, 0, targetWidth, targetHeight);
@@ -349,12 +359,12 @@
 
                     const maxVal = Math.max(r, g, b);
 
-                    // Menghilangkan warna hitam background video animasi
-                    if (maxVal <= 25) {
+                    // Chroma key warna hitam background video
+                    if (maxVal <= 30) {
                         data[i + 3] = 0;
                     } 
-                    else if (maxVal < 60) {
-                        data[i + 3] = Math.round(((maxVal - 25) / 35) * 255);
+                    else if (maxVal < 70) {
+                        data[i + 3] = Math.round(((maxVal - 30) / 40) * 255);
                     } 
                     else {
                         data[i + 3] = 255;
@@ -367,13 +377,13 @@
                 }
 
                 ctx.putImageData(frame, 0, 0);
-                animFrameId = requestAnimationFrame(processChromaKeyUltimate);
+                animFrameId = requestAnimationFrame(processChromaKeyAbsolute);
             }
         }
 
         uploadVideoSource.onplay = () => {
             if (animFrameId) cancelAnimationFrame(animFrameId);
-            processChromaKeyUltimate();
+            processChromaKeyAbsolute();
         };
 
         uploadVideoSource.onended = () => {
