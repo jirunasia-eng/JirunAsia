@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Chroma Key Fix Bug Kanan</title>
+    <title>TikTok Live - Chroma Key Ultimate Fix</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Canvas Animasi HD (Anti Pecah & Fix Bug Kanan) */
+        /* 2. Canvas Animasi HD (Anti Pecah & Clear Total) */
         .upload-canvas-layer {
             position: absolute;
             top: 0;
@@ -320,14 +320,23 @@
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
 
-        // CHROMA KEY FIX BUG KANAN (Video otomatis merenggang pas layar & mengabaikan background hitam luar)
-        function processChromaKeyFixed() {
+        // RENDER COVER ALGORITHM (OTOMATIS MENUTUP LAYAR & MENGHILANGKAN SISI HITAM KANAN/KIRI)
+        function processChromaKeyUltimate() {
             if (!uploadVideoSource.paused && !uploadVideoSource.ended) {
-                // Clear area canvas terlebih dahulu agar tidak ada sisa frame sebelumnya
                 ctx.clearRect(0, 0, targetWidth, targetHeight);
-                
-                // Gambar video animasi menutupi seluruh area canvas (object-fit: cover otomatis)
-                ctx.drawImage(uploadVideoSource, 0, 0, targetWidth, targetHeight);
+
+                const vWidth = uploadVideoSource.videoWidth || targetWidth;
+                const vHeight = uploadVideoSource.videoHeight || targetHeight;
+
+                // Hitung skala agar video selalu "COVER" (menutupi seluruh kanvas tanpa gepeng/sisa hitam)
+                const scale = Math.max(targetWidth / vWidth, targetHeight / vHeight);
+                const drawW = vWidth * scale;
+                const drawH = vHeight * scale;
+                const drawX = (targetWidth - drawW) / 2;
+                const drawY = (targetHeight - drawH) / 2;
+
+                // Gambar video ke kanvas dengan posisi yang sudah di-center & di-crop pas
+                ctx.drawImage(uploadVideoSource, drawX, drawY, drawW, drawH);
                 
                 const frame = ctx.getImageData(0, 0, targetWidth, targetHeight);
                 const data = frame.data;
@@ -340,31 +349,31 @@
 
                     const maxVal = Math.max(r, g, b);
 
-                    // Hanya hilangkan warna hitam asli (< 22) tanpa merusak area lain di kanan/kiri
-                    if (maxVal <= 22) {
+                    // Menghilangkan warna hitam background video animasi
+                    if (maxVal <= 25) {
                         data[i + 3] = 0;
                     } 
-                    else if (maxVal < 55) {
-                        data[i + 3] = Math.round(((maxVal - 22) / 33) * 255);
+                    else if (maxVal < 60) {
+                        data[i + 3] = Math.round(((maxVal - 25) / 35) * 255);
                     } 
                     else {
                         data[i + 3] = 255;
                     }
 
-                    // Proteksi tambahan untuk video green screen asli
+                    // Proteksi tambahan untuk warna hijau (green screen)
                     if (g > 100 && g > r * 1.3 && g > b * 1.3) {
                         data[i + 3] = 0;
                     }
                 }
 
                 ctx.putImageData(frame, 0, 0);
-                animFrameId = requestAnimationFrame(processChromaKeyFixed);
+                animFrameId = requestAnimationFrame(processChromaKeyUltimate);
             }
         }
 
         uploadVideoSource.onplay = () => {
             if (animFrameId) cancelAnimationFrame(animFrameId);
-            processChromaKeyFixed();
+            processChromaKeyUltimate();
         };
 
         uploadVideoSource.onended = () => {
