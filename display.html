@@ -9,18 +9,22 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        html, body { height: 100%; }
+        html, body { height: 100%; width: 100%; }
 
         body {
             background-color: #0b0b0b; color: #ffffff;
             font-family: Arial, sans-serif; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
             height: 100vh;
+            min-height: 100vh;
         }
 
-        /* ============ AREA PANGGUNG (memenuhi layar) ============ */
+        /* ============ AREA PANGGUNG (memenuhi layar sampai BAWAH) ============ */
         .studio-stage {
             position: fixed; inset: 0;
+            width: 100%;
+            height: 100vh;
+            min-height: 100vh;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden;
             background:
@@ -29,10 +33,7 @@
                 #0b0b0b;
         }
 
-        /* ============ KOTAK DISPLAY POTRET ============
-           DEFAULT: memenuhi LAYAR PENUH — lebar penuh (sama seperti sebelumnya)
-           dan PANJANG ikut mengisi sampai bawah layar (tanpa sisa ruang kosong).
-           Bingkai/bezel hanya muncul di "mode pratinjau" (tekan H). */
+        /* ============ KOTAK DISPLAY POTRET ============ */
         .wrapper-9-16 {
             width: 495px;
             height: 880px;
@@ -47,9 +48,7 @@
             transform-origin: center center;
         }
 
-        /* ============ MODE PRATINJAU (tekan H) ============
-           Tampilan bingkai potret ala TikTok Studio: proporsi 9:16 utuh
-           dengan bezel perangkat + sudut membulat. */
+        /* ============ MODE PRATINJAU (tekan H) ============ */
         body.preview .wrapper-9-16 {
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 18px;
@@ -80,7 +79,7 @@
             display: block;
         }
 
-        /* Kotak 1-8: TIDAK DIUBAH — segi-4 115x112, rapi di bagian atas */
+        /* Kotak 1-8: DIKECILKAN — segi-4 (persegi) 85x85 */
         .main-container {
             position: absolute;
             top: 10px;
@@ -100,10 +99,10 @@
         }
 
         .box {
-            width: 115px;
-            height: 112px;
+            width: 85px;
+            height: 85px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background-color: rgba(20, 20, 20, 0.85);
             position: relative; overflow: visible;
@@ -116,7 +115,7 @@
 
         .box .plus {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 42px;
+            font-size: 30px;
             font-weight: 700;
             color: #b0b0b0;
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
@@ -127,28 +126,28 @@
 
         .box .label {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             color: #b0b0b0;
-            margin-top: 4px;
+            margin-top: 3px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.9);
         }
 
         .slot-star-number-group {
-            position: absolute; top: 5px; left: 5px;
-            z-index: 10; height: 18px;
+            position: absolute; top: 4px; left: 4px;
+            z-index: 10; height: 16px;
             background-color: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             display: none; align-items: center;
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
             overflow: hidden;
-            padding-right: 6px;
+            padding-right: 5px;
             gap: 3px;
         }
 
         .slot-star-circle-small {
-            width: 12px; height: 12px;
+            width: 11px; height: 11px;
             background-color: #1890ff;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -161,13 +160,13 @@
 
         .slot-number-text {
             color: #ffffff;
-            font-size: 9px; font-weight: bold;
+            font-size: 8px; font-weight: bold;
             line-height: 1;
         }
 
         .gift-popup-effect {
-            position: absolute; top: 5px; right: 5px;
-            z-index: 20; width: 28px; height: 28px;
+            position: absolute; top: 4px; right: 4px;
+            z-index: 20; width: 22px; height: 22px;
             object-fit: contain; display: none;
             pointer-events: none;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
@@ -183,15 +182,15 @@
         }
 
         .mic-icon-bottom-right {
-            position: absolute; bottom: 5px; right: 5px;
-            z-index: 10; width: 18px; height: 18px;
+            position: absolute; bottom: 4px; right: 4px;
+            z-index: 10; width: 15px; height: 15px;
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 50%;
             display: none; align-items: center; justify-content: center;
             border: 1px solid #000000;
         }
         .mic-icon-bottom-right svg {
-            width: 10px; height: 10px; fill: #ffffff;
+            width: 9px; height: 9px; fill: #ffffff;
         }
 
         .slot-content {
@@ -201,7 +200,7 @@
         }
 
         .slot-avatar {
-            width: 50px; height: 50px;
+            width: 40px; height: 40px;
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 2px;
@@ -209,13 +208,13 @@
         }
 
         .slot-name-bottom {
-            position: absolute; bottom: 5px; left: 5px;
+            position: absolute; bottom: 4px; left: 4px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
-            font-size: 9px; font-weight: bold; padding: 3px 7px 2px 7px;
+            font-size: 8px; font-weight: bold; padding: 2px 6px 1px 6px;
             border-radius: 10px;
-            max-width: 68%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 78%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            display: inline-flex; align-items: center; gap: 4px;
+            display: inline-flex; align-items: center; gap: 3px;
         }
         .slot-name-bottom .name-text {
             overflow: hidden; text-overflow: ellipsis; line-height: 1;
@@ -224,7 +223,7 @@
 
         .slot-name-bottom .plus-icon-large {
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: #ffffff;
             line-height: 1;
@@ -328,10 +327,8 @@
         let targetHeight = DESIGN_H;
 
         // ============ SKALA DISPLAY ============
-        // DEFAULT (tanpa bingkai): lebar & panjang masing-masing mengisi layar PENUH.
-        //   - Lebar  = clientWidth / 495   -> sama persis dengan lebar yang sudah OK
-        //   - Panjang = clientHeight / 880 -> frame potret memanjang sampai BAWAH layar
-        // MODE PRATINJAU (tekan H): proporsi 9:16 utuh + bezel, seperti preview TikTok Studio.
+        // DEFAULT (tanpa bingkai): lebar & panjang mengisi layar PENUH sampai bawah.
+        // MODE PRATINJAU (tekan H): proporsi 9:16 utuh + bezel.
         function applyScale() {
             const preview = document.body.classList.contains('preview');
 
