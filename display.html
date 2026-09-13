@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* Lapisan Video Background/Host */
+        /* Lapisan Video Background/Host Utama */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -56,15 +56,15 @@
         .side-column { 
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-start; /* Mengubah dari space-between agar menumpuk rapat ke atas */
+            justify-content: flex-start; /* Kotak menumpuk rapat ke atas */
             align-items: center;
-            gap: 8px; /* Mengatur jarak dekat antar kotak 1-4 secara vertikal */
+            gap: 8px; /* Jarak rapat antar kotak 1-4 secara vertikal */
         }
 
         /* Ukuran Kotak 1-8 */
         .box {
             width: 115px; 
-            height: 112px; /* Disesuaikan agar proporsional dan muat 4 ke bawah dengan rapi */
+            height: 112px; 
             border: 1px solid rgba(255, 255, 255, 0.8); 
             border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -207,8 +207,8 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- Layer Video Host -->
-        <video class="bg-video-layer" id="bgVideoLayer" playsinline></video>
+        <!-- Layer Video Host / Background -->
+        <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
@@ -287,23 +287,13 @@
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
 
-        bgVideo.onended = () => {
-            bgVideo.style.display = 'none';
-            bgVideo.src = '';
-        };
-
         function parseFlexiblePoints(val) {
             if (val === undefined || val === null) return 0;
             let str = String(val).trim().toUpperCase();
             let multiplier = 1;
 
-            if (str.endsWith('K')) {
-                multiplier = 1000;
-                str = str.slice(0, -1);
-            } else if (str.endsWith('M')) {
-                multiplier = 1000000;
-                str = str.slice(0, -1);
-            }
+            if (str.endsWith('K')) { multiplier = 1000; str = str.slice(0, -1); }
+            else if (str.endsWith('M')) { multiplier = 1000000; str = str.slice(0, -1); }
 
             if (str.includes('.')) {
                 let parts = str.split('.');
@@ -317,9 +307,7 @@
             }
 
             let num = parseFloat(str);
-            if (isNaN(num)) return 0;
-
-            return Math.round(num * multiplier);
+            return isNaN(num) ? 0 : Math.round(num * multiplier);
         }
 
         function formatDisplayPoints(total) {
@@ -336,7 +324,8 @@
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
 
-            if (type === 'UPDATE_GS_VIDEO') {
+            // Penanganan Video Host / Background Utama
+            if (type === 'UPDATE_HOST_VIDEO' || type === 'UPDATE_GS_VIDEO') {
                 bgVideo.pause();
                 bgVideo.currentTime = 0;
                 bgVideo.src = url;
