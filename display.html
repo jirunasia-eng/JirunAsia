@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Paling Belakang) */
+        /* 1. Layer Video Host (Di Belakang - Dibuat agak redup/kurang jelas agar video animasi di depan lebih dominan) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -39,9 +39,11 @@
             z-index: 1; 
             display: none;
             background-color: #000;
+            opacity: 0.55; /* Mengurangi kejelasan video host (semakin kecil angka, semakin redup) */
+            filter: brightness(0.65); /* Membuat video host sedikit gelap tapi tetap terlihat */
         }
 
-        /* 2. Layer Video Animasi (Di Depan, Diberi Opasitas Agar Host di Belakang Tetap Terlihat) */
+        /* 2. Layer Video Animasi (Di Depan - Tampil sangat jelas/normal 100%) */
         .upload-video-layer {
             position: absolute;
             top: 0;
@@ -53,11 +55,8 @@
             display: none;
             background: transparent;
             pointer-events: none; 
-            /* opacity diatur 0.75 (75%) agar animasi tetap tajam tapi video host di belakangnya 
-               tetap terlihat menembus latar belakang hitam animasi tersebut. 
-               Silakan ubah angka 0.75 ke 0.6 atau 0.8 sesuai selera Anda. */
-            opacity: 0.75; 
-            mix-blend-mode: lighten; /* Membantu menyatukan video animasi berlatar hitam dengan host di belakang */
+            opacity: 1; /* Animasi tampil sangat jelas */
+            mix-blend-mode: screen; /* Membuat background hitam animasi menyatu & transparan */
         }
 
         .main-container {
@@ -227,10 +226,10 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Layer Video Host (Paling Belakang) -->
+        <!-- 1. Layer Video Host (Di Belakang - Agak Redup/Kurang Jelas) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Animasi (Di Depan dengan Transparansi & Lighten) -->
+        <!-- 2. Layer Video Animasi (Di Depan - Sangat Jelas 100%) -->
         <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
