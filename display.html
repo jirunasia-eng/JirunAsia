@@ -79,7 +79,7 @@
             display: block;
         }
 
-        /* Kotak 1-8: DIKECILKAN — segi-4 (persegi) 85x85 */
+        /* Kotak 1-8: segi-4 (persegi) 85x85 */
         .main-container {
             position: absolute;
             top: 10px;
@@ -322,13 +322,20 @@
         const DESIGN_W = 495;
         const DESIGN_H = 880;
 
+        // ============ PENGATUR LEBAR TAMPILAN ============
+        // 1.0  = lebar proporsional 9:16, tinggi penuh sampai bawah (default)
+        // 0.8  = lebih sempit lagi | 1.2 = lebih lebar (maks. selebar layar)
+        const SKALA_LEBAR = 1.0;
+
         let animFrameId = null;
         let targetWidth = DESIGN_W;
         let targetHeight = DESIGN_H;
 
         // ============ SKALA DISPLAY ============
-        // DEFAULT (tanpa bingkai): lebar & panjang mengisi layar PENUH sampai bawah.
-        // MODE PRATINJAU (tekan H): proporsi 9:16 utuh + bezel.
+        // Sebelumnya: lebar dipaksa memenuhi seluruh layar (scale(sx, sy) berbeda)
+        // -> membuat tampilan terlalu LEBAR dan kotak jadi lonjong.
+        // Sekarang: skala SERAGAM. Tinggi tetap penuh sampai bawah,
+        // lebar mengikuti rasio potret 9:16 (lebih sempit, kotak tetap persegi).
         function applyScale() {
             const preview = document.body.classList.contains('preview');
 
@@ -340,9 +347,13 @@
                 ));
                 wrapperContainer.style.transform = `scale(${s})`;
             } else {
-                const sx = Math.max(0.05, studioStage.clientWidth / DESIGN_W);
-                const sy = Math.max(0.05, studioStage.clientHeight / DESIGN_H);
-                wrapperContainer.style.transform = `scale(${sx}, ${sy})`;
+                const sTinggi = studioStage.clientHeight / DESIGN_H;
+                const sLebarMaks = studioStage.clientWidth / DESIGN_W;
+                const s = Math.min(
+                    Math.max(0.05, sTinggi * SKALA_LEBAR),
+                    Math.max(0.05, sLebarMaks)
+                );
+                wrapperContainer.style.transform = `scale(${s})`;
             }
             requestAnimationFrame(initCanvasResolution);
         }
