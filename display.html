@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Chroma Key HD (Host & Animasi Tajam)</title>
+    <title>TikTok Live - Chroma Key Fix Bug Kanan</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Canvas Animasi HD (Anti Pecah & Tajam) */
+        /* 2. Canvas Animasi HD (Anti Pecah & Fix Bug Kanan) */
         .upload-canvas-layer {
             position: absolute;
             top: 0;
@@ -219,7 +219,7 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Video Host (Lapisan Belakang) -->
+        <!-- 1. Video Host (Layer Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
         <!-- 2. Sumber Video Animasi (Tersembunyi) -->
@@ -295,15 +295,13 @@
         const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
 
         let animFrameId = null;
+        const targetWidth = 495;
+        const targetHeight = 880;
 
-        // Pengaturan Resolusi Canvas Tinggi (HD Retina Support agar tidak pecah)
         function initCanvasResolution() {
             const dpr = window.devicePixelRatio || 1;
-            const displayWidth = 495;
-            const displayHeight = 880;
-
-            animCanvas.width = displayWidth * dpr;
-            animCanvas.height = displayHeight * dpr;
+            animCanvas.width = targetWidth * dpr;
+            animCanvas.height = targetHeight * dpr;
             ctx.scale(dpr, dpr);
         }
         initCanvasResolution();
@@ -322,13 +320,16 @@
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
 
-        // ALGORITMA CHROMA KEY HD (Presisi Tinggi, Objek Timbul Tajam, Latar Hitam Hilang Sempurna)
-        function processChromaKeyHD() {
+        // CHROMA KEY FIX BUG KANAN (Video otomatis merenggang pas layar & mengabaikan background hitam luar)
+        function processChromaKeyFixed() {
             if (!uploadVideoSource.paused && !uploadVideoSource.ended) {
-                const w = 495;
-                const h = 880;
-                ctx.drawImage(uploadVideoSource, 0, 0, w, h);
-                const frame = ctx.getImageData(0, 0, w, h);
+                // Clear area canvas terlebih dahulu agar tidak ada sisa frame sebelumnya
+                ctx.clearRect(0, 0, targetWidth, targetHeight);
+                
+                // Gambar video animasi menutupi seluruh area canvas (object-fit: cover otomatis)
+                ctx.drawImage(uploadVideoSource, 0, 0, targetWidth, targetHeight);
+                
+                const frame = ctx.getImageData(0, 0, targetWidth, targetHeight);
                 const data = frame.data;
                 const len = data.length;
 
@@ -339,40 +340,38 @@
 
                     const maxVal = Math.max(r, g, b);
 
-                    // Hilangkan latar hitam pekat secara presisi
-                    if (maxVal <= 30) {
+                    // Hanya hilangkan warna hitam asli (< 22) tanpa merusak area lain di kanan/kiri
+                    if (maxVal <= 22) {
                         data[i + 3] = 0;
                     } 
-                    // Haluskan pinggiran objek (Edge anti-aliasing) agar tidak ada garis patah-patah
-                    else if (maxVal < 65) {
-                        data[i + 3] = Math.round(((maxVal - 30) / 35) * 255);
+                    else if (maxVal < 55) {
+                        data[i + 3] = Math.round(((maxVal - 22) / 33) * 255);
                     } 
-                    // Jaga objek animasi agar 100% padat, terang, dan tidak transparan
                     else {
                         data[i + 3] = 255;
                     }
 
-                    // Tambahan backup jika video animasi berlatar hijau (Green Screen)
+                    // Proteksi tambahan untuk video green screen asli
                     if (g > 100 && g > r * 1.3 && g > b * 1.3) {
                         data[i + 3] = 0;
                     }
                 }
 
                 ctx.putImageData(frame, 0, 0);
-                animFrameId = requestAnimationFrame(processChromaKeyHD);
+                animFrameId = requestAnimationFrame(processChromaKeyFixed);
             }
         }
 
         uploadVideoSource.onplay = () => {
             if (animFrameId) cancelAnimationFrame(animFrameId);
-            processChromaKeyHD();
+            processChromaKeyFixed();
         };
 
         uploadVideoSource.onended = () => {
             uploadVideoSource.pause();
             uploadVideoSource.currentTime = 0;
             if (animFrameId) cancelAnimationFrame(animFrameId);
-            ctx.clearRect(0, 0, animCanvas.width, animCanvas.height);
+            ctx.clearRect(0, 0, targetWidth, targetHeight);
         };
 
         function parseFlexiblePoints(val) {
