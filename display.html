@@ -23,21 +23,35 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            padding: 15px 14px;
             border: 1px solid #333;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
+        /* Lapisan Video Background/Host dipastikan tampil di atas background hitam wrapper */
+        .bg-video-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1; 
+            display: none;
+            pointer-events: none;
+        }
+
         .main-container {
-            position: relative;
+            position: absolute;
+            top: 5px; /* Ditarik maksimal ke atas agar pas dengan foto contoh */
+            left: 0;
+            width: 100%;
+            height: 700px; 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start; /* Kotak ditarik ke atas */
-            width: 100%;
-            height: 720px; /* Tinggi area kotak dibatasi agar menyisakan ruang bawah */
-            z-index: 2;
-            padding: 5px 5px;
+            align-items: flex-start;
+            z-index: 5; /* Berada di atas video */
+            padding: 0 12px;
         }
 
         .side-column { 
@@ -50,7 +64,7 @@
         /* Ukuran Kotak 1-8 */
         .box {
             width: 115px; 
-            height: 130px; 
+            height: 120px; /* Disesuaikan agar lebih rapat ke atas secara vertikal */
             border: 1px solid rgba(255, 255, 255, 0.8); 
             border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -146,12 +160,6 @@
             width: 10px; height: 10px; fill: #ffffff;
         }
 
-        .bg-video-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 10; display: none;
-            pointer-events: none; mix-blend-mode: screen; 
-        }
-
         .slot-content {
             position: absolute; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -159,7 +167,7 @@
         }
         
         .slot-avatar { 
-            width: 62px; height: 62px; 
+            width: 55px; height: 55px; 
             border-radius: 50%; 
             object-fit: cover; 
             margin-bottom: 2px; 
@@ -199,6 +207,9 @@
 <body>
 
     <div class="wrapper-9-16">
+        <!-- Layer Video Host -->
+        <video class="bg-video-layer" id="bgVideoLayer" playsinline></video>
+
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
             <div class="side-column">
@@ -256,8 +267,6 @@
                 </div>
             </div>
         </div>
-
-        <video class="bg-video-layer" id="bgVideoLayer" playsinline></video>
     </div>
 
     <script>
