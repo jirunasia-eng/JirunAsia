@@ -258,6 +258,22 @@
             
             channel.postMessage({ type: 'UPDATE_TARGET_SLOT', data: finalData });
             statusMsg.innerText = `Kotak ${slotId} Berhasil Dipasang!`;
+            statusMsg.className = 'status-msg success';
+
+            // === AUTO RESET: kolom username dikosongkan otomatis setelah dipasang ===
+            // Data final sudah tersimpan di finalData & sudah dikirim, jadi aman dibersihkan
+            setTimeout(() => {
+                targetInput.value = '';
+                targetCardInline.classList.remove('show');
+                previewImg.src = '';
+                targetName.innerText = '-';
+                targetUsername.innerText = '-';
+                pendingTargetData = { username: '', name: '', photo: '' };
+                btnInstall.innerText = "Pasang ke Display";
+                btnInstall.disabled = true;
+                statusMsg.innerText = 'Siap';
+                statusMsg.className = 'status-msg';
+            }, 1500); // pesan sukses tampil 1,5 detik dulu, lalu form ter-reset otomatis
         }
 
         function clearTarget() {
