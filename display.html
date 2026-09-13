@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Chroma Key Realtime (Host & Animasi Timbul)</title>
+    <title>TikTok Live - Chroma Key HD (Host & Animasi Tajam)</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* 1. Layer Video Host (Paling Belakang) */
+        /* 1. Video Host (Layer Belakang) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -41,7 +41,7 @@
             background-color: #000;
         }
 
-        /* 2. Layer Canvas Animasi (Tepat di Atas Host - Chroma Keyed) */
+        /* 2. Canvas Animasi HD (Anti Pecah & Tajam) */
         .upload-canvas-layer {
             position: absolute;
             top: 0;
@@ -219,14 +219,14 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Video Host (Tampil di Lapisan Belakang) -->
+        <!-- 1. Video Host (Lapisan Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Video Animasi Tersembunyi (Hanya Sebagai Sumber Data Stream) -->
+        <!-- 2. Sumber Video Animasi (Tersembunyi) -->
         <video id="uploadVideoSource" playsinline style="display: none;"></video>
         
-        <!-- 3. Canvas Overlay (Tempat Rendering Animasi Chroma Key: Hitam Hilang, Animasi Timbul Opaque) -->
-        <canvas class="upload-canvas-layer" id="animationCanvas" width="495" height="880"></canvas>
+        <!-- 3. Canvas Animasi HD -->
+        <canvas class="upload-canvas-layer" id="animationCanvas"></canvas>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
@@ -296,6 +296,18 @@
 
         let animFrameId = null;
 
+        // Pengaturan Resolusi Canvas Tinggi (HD Retina Support agar tidak pecah)
+        function initCanvasResolution() {
+            const dpr = window.devicePixelRatio || 1;
+            const displayWidth = 495;
+            const displayHeight = 880;
+
+            animCanvas.width = displayWidth * dpr;
+            animCanvas.height = displayHeight * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        initCanvasResolution();
+
         const giftDatabase = {
             "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
             "Antar Bintang": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp",
@@ -310,11 +322,13 @@
             "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
 
-        // TEKNIK CHROMA KEY REALTIME (Hapus background Hitam / Hijau, jaga Animasi tetap Padat & Timbul)
-        function processChromaKey() {
+        // ALGORITMA CHROMA KEY HD (Presisi Tinggi, Objek Timbul Tajam, Latar Hitam Hilang Sempurna)
+        function processChromaKeyHD() {
             if (!uploadVideoSource.paused && !uploadVideoSource.ended) {
-                ctx.drawImage(uploadVideoSource, 0, 0, animCanvas.width, animCanvas.height);
-                const frame = ctx.getImageData(0, 0, animCanvas.width, animCanvas.height);
+                const w = 495;
+                const h = 880;
+                ctx.drawImage(uploadVideoSource, 0, 0, w, h);
+                const frame = ctx.getImageData(0, 0, w, h);
                 const data = frame.data;
                 const len = data.length;
 
@@ -325,33 +339,33 @@
 
                     const maxVal = Math.max(r, g, b);
 
-                    // 1. Jika latar HITAM pekat (< 25): Buat 100% Transparan
-                    if (maxVal <= 25) {
+                    // Hilangkan latar hitam pekat secara presisi
+                    if (maxVal <= 30) {
                         data[i + 3] = 0;
                     } 
-                    // Anti-aliasing / Pinggiran Halus
-                    else if (maxVal < 50) {
-                        data[i + 3] = Math.round(((maxVal - 25) / 25) * 255);
+                    // Haluskan pinggiran objek (Edge anti-aliasing) agar tidak ada garis patah-patah
+                    else if (maxVal < 65) {
+                        data[i + 3] = Math.round(((maxVal - 30) / 35) * 255);
                     } 
-                    // 2. Jika Objek Animasi Terang (> 50): Jaga 100% PADAT, TAJAM, & TIMBUL (Opaque)
+                    // Jaga objek animasi agar 100% padat, terang, dan tidak transparan
                     else {
                         data[i + 3] = 255;
                     }
 
-                    // 3. Dukungan Ekstra: Jika video berlatar GREEN SCREEN (Hijau Dominan)
-                    if (g > 100 && g > r * 1.35 && g > b * 1.35) {
+                    // Tambahan backup jika video animasi berlatar hijau (Green Screen)
+                    if (g > 100 && g > r * 1.3 && g > b * 1.3) {
                         data[i + 3] = 0;
                     }
                 }
 
                 ctx.putImageData(frame, 0, 0);
-                animFrameId = requestAnimationFrame(processChromaKey);
+                animFrameId = requestAnimationFrame(processChromaKeyHD);
             }
         }
 
         uploadVideoSource.onplay = () => {
             if (animFrameId) cancelAnimationFrame(animFrameId);
-            processChromaKey();
+            processChromaKeyHD();
         };
 
         uploadVideoSource.onended = () => {
