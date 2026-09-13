@@ -18,7 +18,7 @@
             height: 100vh;
         }
 
-        /* ============ AREA PANGGUNG (memenuhi layar, kotak di-center) ============ */
+        /* ============ AREA PANGGUNG (memenuhi layar) ============ */
         .studio-stage {
             position: fixed; inset: 0;
             display: flex; align-items: center; justify-content: center;
@@ -29,9 +29,10 @@
                 #0b0b0b;
         }
 
-        /* ============ KOTAK DISPLAY ala PRATINJAU POTRET TIKTOK STUDIO ============
-           Basis tetap 495x880 (9:16), lalu di-scale via transform agar
-           selalu MEMENUHI LAYAR (panjang penuh sampai bawah). */
+        /* ============ KOTAK DISPLAY POTRET ============
+           DEFAULT: memenuhi LAYAR PENUH — lebar penuh (sama seperti sebelumnya)
+           dan PANJANG ikut mengisi sampai bawah layar (tanpa sisa ruang kosong).
+           Bingkai/bezel hanya muncul di "mode pratinjau" (tekan H). */
         .wrapper-9-16 {
             width: 495px;
             height: 880px;
@@ -40,14 +41,22 @@
             display: flex; flex-direction: column; align-items: center;
             position: relative;
             overflow: hidden;
-            /* Tampilan frame pratinjau TikTok Studio */
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            transform-origin: center center;
+        }
+
+        /* ============ MODE PRATINJAU (tekan H) ============
+           Tampilan bingkai potret ala TikTok Studio: proporsi 9:16 utuh
+           dengan bezel perangkat + sudut membulat. */
+        body.preview .wrapper-9-16 {
             border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: 18px;
             box-shadow:
-                0 0 0 6px #1c1d22,          /* bezel perangkat */
+                0 0 0 6px #1c1d22,
                 0 0 0 7px rgba(255,255,255,0.06),
                 0 20px 70px rgba(0, 0, 0, 0.85);
-            transform-origin: center center;
         }
 
         /* 1. Video Host (Layer Belakang) */
@@ -71,7 +80,7 @@
             display: block;
         }
 
-        /* ===== DIKEMBALIKAN: container seperti desain awal, kotak numpuk di atas ===== */
+        /* Kotak 1-8: TIDAK DIUBAH — segi-4 115x112, rapi di bagian atas */
         .main-container {
             position: absolute;
             top: 10px;
@@ -90,7 +99,6 @@
             gap: 8px;
         }
 
-        /* ===== DIKEMBALIKAN: kotak segi-4 ukuran asli 115x112, tetap di atas ===== */
         .box {
             width: 115px;
             height: 112px;
@@ -228,14 +236,6 @@
             position: relative;
             top: -0.5px;
         }
-
-        /* ============ MODE BERSIH (tekan H) — untuk capture OBS ============
-           Menghilangkan frame/bezel, tampilan memenuhi layar apa adanya. */
-        body.clean .wrapper-9-16 {
-            border-color: transparent;
-            border-radius: 0;
-            box-shadow: none;
-        }
     </style>
 </head>
 <body>
@@ -320,7 +320,6 @@
         const studioStage = document.getElementById('studioStage');
         const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
 
-        // Basis desain tetap 9:16 (495x880)
         const DESIGN_W = 495;
         const DESIGN_H = 880;
 
@@ -328,34 +327,29 @@
         let targetWidth = DESIGN_W;
         let targetHeight = DESIGN_H;
 
-        // ============ MODE SKALA (UBAH) ============
-        // 'stretch' (default) -> frame MELEBAR/MEMANJANG mengisi layar penuh,
-        //                        kotak tetap segi-4 kecil di atas (bentuk asli)
-        // 'fit'               -> proporsi 9:16 asli utuh (ada sisa ruang jika layar tidak 9:16)
-        let fitMode = 'stretch';
-
+        // ============ SKALA DISPLAY ============
+        // DEFAULT (tanpa bingkai): lebar & panjang masing-masing mengisi layar PENUH.
+        //   - Lebar  = clientWidth / 495   -> sama persis dengan lebar yang sudah OK
+        //   - Panjang = clientHeight / 880 -> frame potret memanjang sampai BAWAH layar
+        // MODE PRATINJAU (tekan H): proporsi 9:16 utuh + bezel, seperti preview TikTok Studio.
         function applyScale() {
-            const clean = document.body.classList.contains('clean');
-            const framePad = clean ? 0 : 14;
-            const availW = Math.max(50, studioStage.clientWidth - framePad);
-            const availH = Math.max(50, studioStage.clientHeight - framePad);
+            const preview = document.body.classList.contains('preview');
 
-            let sx, sy;
-            if (fitMode === 'stretch') {
-                // Lebar & panjang masing-masing dipaksa mengisi layar
-                sx = Math.max(0.05, availW / DESIGN_W);
-                sy = Math.max(0.05, availH / DESIGN_H);
+            if (preview) {
+                const pad = 14;
+                const s = Math.max(0.05, Math.min(
+                    (studioStage.clientWidth - pad) / DESIGN_W,
+                    (studioStage.clientHeight - pad) / DESIGN_H
+                ));
+                wrapperContainer.style.transform = `scale(${s})`;
             } else {
-                // Proporsi asli dipertahankan
-                const s = Math.max(0.05, Math.min(availW / DESIGN_W, availH / DESIGN_H));
-                sx = sy = s;
+                const sx = Math.max(0.05, studioStage.clientWidth / DESIGN_W);
+                const sy = Math.max(0.05, studioStage.clientHeight / DESIGN_H);
+                wrapperContainer.style.transform = `scale(${sx}, ${sy})`;
             }
-
-            wrapperContainer.style.transform = `scale(${sx}, ${sy})`;
             requestAnimationFrame(initCanvasResolution);
         }
 
-        // (UBAH) resolusi canvas mengikuti skala X & Y yang berbeda
         function initCanvasResolution() {
             const rect = wrapperContainer.getBoundingClientRect();
             targetWidth = DESIGN_W;
@@ -372,14 +366,10 @@
         window.addEventListener('resize', applyScale);
         window.addEventListener('keydown', (e) => {
             const k = e.key.toLowerCase();
-            if (k === 'h') { document.body.classList.toggle('clean'); applyScale(); }
+            if (k === 'h') { document.body.classList.toggle('preview'); applyScale(); }
             if (k === 'f') {
                 if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
                 else document.exitFullscreen().catch(() => {});
-            }
-            if (k === 'v') { // ganti mode skala: stretch <-> fit
-                fitMode = (fitMode === 'stretch') ? 'fit' : 'stretch';
-                applyScale();
             }
         });
         document.addEventListener('fullscreenchange', applyScale);
