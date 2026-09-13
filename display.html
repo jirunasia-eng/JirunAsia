@@ -28,7 +28,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* Lapisan Video Background/Host Utama */
+        /* 1. Layer Video Host (Berputar Berulang-ulang / Loop terus) */
         .bg-video-layer {
             position: absolute;
             top: 0;
@@ -41,6 +41,19 @@
             background-color: #000;
         }
 
+        /* 2. Layer Video Upload Latar Belakang (Hanya 1 Kali Putar / Non-Loop) */
+        .upload-video-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 2; /* Berada di atas video host, tapi di bawah kotak/konten */
+            display: none;
+            background-color: transparent;
+        }
+
         .main-container {
             position: absolute;
             top: 10px; /* Posisi paling atas layar */
@@ -49,7 +62,7 @@
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start;
-            z-index: 5; /* Berada di atas video */
+            z-index: 5; /* Berada di atas semua video */
             padding: 0 12px;
         }
 
@@ -207,8 +220,11 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- Layer Video Host / Background -->
+        <!-- 1. Layer Video Host (Looping Berulang Terus) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
+        
+        <!-- 2. Layer Video Upload Latar Belakang (Putar 1 Kali Saja / Non-Loop) -->
+        <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
@@ -271,7 +287,8 @@
 
     <script>
         const channel = new BroadcastChannel('live_control_channel');
-        const bgVideo = document.getElementById('bgVideoLayer');
+        const bgVideo = document.getElementById('bgVideoLayer');       // Video Host (Loop)
+        const uploadVideo = document.getElementById('uploadVideoLayer'); // Video Upload (1 Kali Putar)
 
         const giftDatabase = {
             "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
@@ -300,9 +317,7 @@
                 str = str.slice(0, -1); 
             }
 
-            // Ubah koma menjadi titik agar bisa dibaca oleh parseFloat JavaScript
             str = str.replace(',', '.');
-
             let num = parseFloat(str);
             return isNaN(num) ? 0 : Math.round(num * multiplier);
         }
@@ -318,11 +333,18 @@
             return total.toLocaleString('id-ID');
         }
 
+        // Event saat video upload (latar belakang) selesai diputar 1 kali
+        uploadVideo.onended = () => {
+            uploadVideo.pause();
+            uploadVideo.currentTime = 0;
+            uploadVideo.style.display = 'none'; // Sembunyikan setelah selesai
+        };
+
         channel.onmessage = (event) => {
             const { type, data, url } = event.data;
 
-            // Penanganan Video Host / Background Utama
-            if (type === 'UPDATE_HOST_VIDEO' || type === 'UPDATE_GS_VIDEO') {
+            // 1. UPDATE_HOST_VIDEO: Video Host Berputar Berulang-ulang & Tidak Hilang walau ada upload video
+            if (type === 'UPDATE_HOST_VIDEO') {
                 bgVideo.pause();
                 bgVideo.currentTime = 0;
                 bgVideo.src = url;
@@ -332,6 +354,20 @@
                 bgVideo.play().catch(e => {
                     bgVideo.muted = true;
                     bgVideo.play();
+                });
+            }
+
+            // 2. UPDATE_GS_VIDEO: Video Upload Latar Belakang (Bersuara, Hanya 1 kali putar sampai habis)
+            if (type === 'UPDATE_GS_VIDEO') {
+                uploadVideo.pause();
+                uploadVideo.currentTime = 0;
+                uploadVideo.src = url;
+                uploadVideo.style.display = 'block';
+                uploadVideo.load();
+                uploadVideo.muted = false; // Bersuara
+                uploadVideo.play().catch(e => {
+                    uploadVideo.muted = true;
+                    uploadVideo.play();
                 });
             }
 
