@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - 8 Kotak Control Panel Pro</title>
+    <title>TikTok Live - Control Panel Pro</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -11,7 +11,7 @@
             background-color: #050505; color: #fff; overflow-x: hidden; min-height: 100vh;
         }
         .control-panel {
-            width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; 
+            width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; 
             background: #0f172a; overflow-y: auto; border: 2px solid #334155;
             display: flex; flex-direction: column; min-height: 100vh;
         }
@@ -51,15 +51,8 @@
 <body>
 
     <div class="control-panel">
-        <h2>Control Panel (8 Kotak System Pro)</h2>
+        <h2>Control Panel (Pro System)</h2>
         
-        <!-- Input Nama Host -->
-        <div class="form-group">
-            <label for="hostUserInput">Nama Host (Tampil di Bawah Kotak):</label>
-            <input type="text" id="hostUserInput" placeholder="Masukkan nama host...">
-            <button class="btn-action btn-play" onclick="updateHostUser()">Ubah Nama Host</button>
-        </div>
-
         <!-- Input Video Host -->
         <div class="form-group">
             <label for="hostVideoFile">Upload Video Host (Dalam Kotak):</label>
@@ -72,7 +65,7 @@
             <label for="gsVideoFile" style="color: #34d399;">Upload Video Latar Belakang (Bersuara):</label>
             <input type="file" id="gsVideoFile" accept="video/*">
 
-            <label style="margin-top:12px; color: #38bdf8;" for="targetSlotAuto">Pilih Kotak Target untuk Video Ini (1 - 8):</label>
+            <label style="margin-top:12px; color: #38bdf8;" for="targetSlotAuto">Pilih Kotak Target untuk Video Ini:</label>
             <select id="targetSlotAuto">
                 <option value="1">Kotak 1</option>
                 <option value="2">Kotak 2</option>
@@ -86,11 +79,17 @@
 
             <label style="margin-top:10px; color: #38bdf8;" for="pointSelectAuto">Pilih Gift Otomatis (Nama & Icon):</label>
             <select id="pointSelectAuto">
-                <option value="6000" data-name="Legend Marcellus" data-gift="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp">Legend Marcellus (6.000)</option>
+                <option value="6000" data-name="Legend Marcellus" data-gift="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp">Legend Marcellus (42.999)</option>
                 <option value="10000" data-name="Antar Bintang" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp">Antar Bintang (10.000)</option>
+                <option value="12000" data-name="Pegasus" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp">Pegasus (42.999)</option>
                 <option value="25999" data-name="Adam's Dream" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp">Adam's Dream (25.999)</option>
+                <option value="26999" data-name="Dragon Flame" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/89b4d1d93c1cc614e3a0903ac7a94e0c~tplv-obj.webp">Dragon Flame (26.999)</option>
                 <option value="29999" data-name="Singa" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp">Singa (29.999)</option>
+                <option value="39999" data-name="Thunder Falcon" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/26f3fbcda383e6093a19b8e7351a164c~tplv-obj.webp">Thunder Falcon (39.999)</option>
+                <option value="41999" data-name="Fire Phoenix" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/bfb8425a7e8fa03f9fec05a973a4a506.png~tplv-obj.webp">Fire Phoenix (41.999)</option>
+                <option value="42999" data-name="Kota Masa Depan" data-gift="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp">Kota Masa Depan (6.000)</option>
                 <option value="44999" data-name="TikTok Universe" data-gift="https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp">TikTok Universe (44.999)</option>
+                <option value="12000" data-name="Red Lightning" data-gift="https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/e7ce188da898772f18aaffe49a7bd7db~tplv-obj.webp">Red Lightning (12.000)</option>
             </select>
 
             <button class="btn-action btn-play" onclick="playGreenScreenVideo()">Tampilkan Video Latar Belakang</button>
@@ -128,7 +127,7 @@
     </div>
 
     <script>
-        const channel = new BroadcastChannel('live_control_channel_8box');
+        const channel = new BroadcastChannel('live_control_channel');
         let hostVideoUrl = '';
         let gsVideoUrl = '';
         let pendingTargetData = { username: '', name: '', photo: '' };
@@ -258,15 +257,7 @@
             };
             
             channel.postMessage({ type: 'UPDATE_TARGET_SLOT', data: finalData });
-
-            // Reset input dan form setelah berhasil dipasang ke display
-            targetInput.value = '';
-            targetCardInline.classList.remove('show');
             statusMsg.innerText = `Kotak ${slotId} Berhasil Dipasang!`;
-            statusMsg.className = 'status-msg success';
-            btnInstall.innerText = "Pasang ke Display";
-            btnInstall.disabled = true;
-            pendingTargetData = { username: '', name: '', photo: '' };
         }
 
         function clearTarget() {
@@ -280,11 +271,6 @@
 
             pendingTargetData = { username: '', name: '', photo: '' };
             channel.postMessage({ type: 'UPDATE_TARGET_SLOT', data: { slot: slotId, clear: true } });
-        }
-
-        function updateHostUser() {
-            const val = document.getElementById('hostUserInput').value;
-            channel.postMessage({ type: 'UPDATE_HOST_USER', data: val });
         }
 
         document.getElementById('hostVideoFile').addEventListener('change', (e) => {
@@ -312,11 +298,17 @@
             const giftIconUrl = selectedOption.getAttribute('data-gift') || '';
             const giftNameStr = selectedOption.getAttribute('data-name') || '';
 
+            // 1. Kirim trigger video latar belakang utama
             channel.postMessage({ type: 'UPDATE_GS_VIDEO', slot: slotId, url: gsVideoUrl });
-            channel.postMessage({ 
-                type: 'ADD_POINTS_TO_SLOT', 
-                data: { slot: slotId, addPoints: selectedPoints, giftIcon: giftIconUrl, giftName: giftNameStr } 
-            });
+
+            // 2. Kirim update penambahan poin dan icon gift otomatis ke kotak target yang dipilih
+            const updateData = {
+                slot: slotId,
+                addPoints: selectedPoints,
+                giftIcon: giftIconUrl,
+                giftName: giftNameStr
+            };
+            channel.postMessage({ type: 'ADD_POINTS_TO_SLOT', data: updateData });
         }
     </script>
 </body>
