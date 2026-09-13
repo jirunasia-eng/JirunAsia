@@ -41,8 +41,8 @@
             background-color: #000;
         }
 
-        /* 2. Layer Video Upload Animasi (Di atas Host, dibuat transparan agar video host tetap nampak bersamaan) */
-        .upload-video-layer {
+        /* 2. Layer Canvas untuk Animasi Video (Warna asli tetap pekat, background hitam otomatis transparan) */
+        .upload-canvas-layer {
             position: absolute;
             top: 0;
             left: 0;
@@ -51,28 +51,33 @@
             object-fit: cover;
             z-index: 2; 
             display: none;
-            background: transparent; /* Transparan agar video host di bawahnya tetap terlihat */
-            mix-blend-mode: screen;  /* Membantu menyatukan latar belakang hitam video animasi dengan video host */
+            background: transparent;
+            pointer-events: none; /* Supaya klik tembus ke elemen di bawahnya */
+        }
+
+        /* Video tersembunyi sebagai sumber data untuk canvas */
+        #uploadVideoSource {
+            display: none;
         }
 
         .main-container {
             position: absolute;
-            top: 10px; /* Posisi paling atas layar */
+            top: 10px;
             left: 0;
             width: 100%;
             display: flex; 
             justify-content: space-between; 
             align-items: flex-start;
-            z-index: 5; /* Berada di atas semua video */
+            z-index: 5; /* Berada di atas video */
             padding: 0 12px;
         }
 
         .side-column { 
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-start; /* Kotak menumpuk rapat ke atas */
+            justify-content: flex-start; 
             align-items: center;
-            gap: 8px; /* Jarak rapat antar kotak 1-4 secara vertikal */
+            gap: 8px; 
         }
 
         /* Ukuran Kotak 1-8 */
@@ -161,7 +166,7 @@
             100% { opacity: 0; transform: scale(0.8) translateY(-15px); }
         }
 
-        /* Icon Mikrofon (Digeser lebih ke bawah agar sejajar dengan barisan nama target) */
+        /* Icon Mikrofon (Sejajar dengan barisan nama target) */
         .mic-icon-bottom-right {
             position: absolute; bottom: 5px; right: 5px;
             z-index: 10; width: 18px; height: 18px;
@@ -188,7 +193,7 @@
             border: 2px solid #fff; 
         }
         
-        /* Barisan Nama Target (Disesuaikan agar ada ruang untuk ikon mikrofon di sebelah kanan) */
+        /* Barisan Nama Target */
         .slot-name-bottom {
             position: absolute; bottom: 5px; left: 5px;
             z-index: 10; background-color: rgba(0, 0, 0, 0.75); color: #fff;
@@ -222,11 +227,13 @@
 <body>
 
     <div class="wrapper-9-16">
-        <!-- 1. Layer Video Host (Looping Berulang Terus di Belakang) -->
+        <!-- 1. Layer Video Host (Paling Belakang) -->
         <video class="bg-video-layer" id="bgVideoLayer" playsinline loop></video>
         
-        <!-- 2. Layer Video Upload Animasi (Diputar 1 kali, transparan/screen agar menyatu dengan video host) -->
-        <video class="upload-video-layer" id="uploadVideoLayer" playsinline></video>
+        <!-- 2. Layer Canvas untuk Animasi Video dengan Warna Asli Pepek & Transparan Otomatis -->
+        <canvas class="upload-canvas-layer" id="uploadCanvasLayer"></canvas>
+        <!-- Sumber Video Tersembunyi -->
+        <video id="uploadVideoSource" playsinline></video>
 
         <div class="main-container">
             <!-- Kolom Kiri (Slot 1 sampai 4) -->
@@ -289,8 +296,12 @@
 
     <script>
         const channel = new BroadcastChannel('live_control_channel');
-        const bgVideo = document.getElementById('bgVideoLayer');       // Video Host (Loop)
-        const uploadVideo = document.getElementById('uploadVideoLayer'); // Video Upload (1 Kali Putar)
+        const bgVideo = document.getElementById('bgVideoLayer');       
+        const uploadVideoSource = document.getElementById('uploadVideoSource'); 
+        const uploadCanvas = document.getElementById('uploadCanvasLayer');
+        const canvasCtx = uploadCanvas.getContext('2d', { willReadFrequently: true });
+
+        let animationFrameId = null;
 
         const giftDatabase = {
             "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
@@ -335,7 +346,6 @@
             return total.toLocaleString('id-ID');
         }
 
-        // Fungsi untuk mengambil setengah dari karakter nama jika terlalu panjang, lalu ditambahkan titik-titik (...)
         function formatShortName(name) {
             if (!name) return "";
             if (name.length > 8) {
@@ -345,11 +355,48 @@
             return name;
         }
 
-        // Event saat video upload (latar belakang) selesai diputar 1 kali
-        uploadVideo.onended = () => {
-            uploadVideo.pause();
-            uploadVideo.currentTime = 0;
-            uploadVideo.style.display = 'none'; // Sembunyikan setelah selesai
+        // Fungsi memproses frame video agar latar belakang hitam transparan, warna asli tetap pekat/cerah
+        function processVideoFrame() {
+            if (uploadVideoSource.paused || uploadVideoSource.ended) {
+                cancelAnimationFrame(animationFrameId);
+                uploadCanvas.style.display = 'none';
+                return;
+            }
+
+            if (uploadCanvas.width !== uploadVideoSource.videoWidth || uploadCanvas.height !== uploadVideoSource.videoHeight) {
+                uploadCanvas.width = uploadVideoSource.videoWidth || 495;
+                uploadCanvas.height = uploadVideoSource.videoHeight || 880;
+            }
+
+            canvasCtx.drawImage(uploadVideoSource, 0, 0, uploadCanvas.width, uploadCanvas.height);
+            
+            try {
+                let frameData = canvasCtx.getImageData(0, 0, uploadCanvas.width, uploadCanvas.height);
+                let data = frameData.data;
+
+                // Mengubah warna hitam gelap menjadi transparan tanpa merusak warna cerah objek animasi
+                for (let i = 0; i < data.length; i += 4) {
+                    let r = data[i];
+                    let g = data[i+1];
+                    let b = data[i+2];
+
+                    // Jika pixel berwarna hitam pekat (latar belakang), buat alpha menjadi 0 (transparan)
+                    if (r < 25 && g < 25 && b < 25) {
+                        data[i+3] = 0; 
+                    }
+                }
+                canvasCtx.putImageData(frameData, 0, 0);
+            } catch (e) {
+                // Mencegah error keamanan CORS apabila memuat video lintas domain eksternal
+            }
+
+            animationFrameId = requestAnimationFrame(processVideoFrame);
+        }
+
+        uploadVideoSource.onended = () => {
+            uploadVideoSource.pause();
+            uploadCanvas.style.display = 'none';
+            cancelAnimationFrame(animationFrameId);
         };
 
         channel.onmessage = (event) => {
@@ -369,17 +416,23 @@
                 });
             }
 
-            // 2. UPDATE_GS_VIDEO: Video Upload Animasi (Bersuara, Diputar 1 kali, menyatu dengan video host)
+            // 2. UPDATE_GS_VIDEO: Video Upload Animasi (Warna Asli Cerah + Background Hitam Transparan Otomatis)
             if (type === 'UPDATE_GS_VIDEO') {
-                uploadVideo.pause();
-                uploadVideo.currentTime = 0;
-                uploadVideo.src = url;
-                uploadVideo.style.display = 'block';
-                uploadVideo.load();
-                uploadVideo.muted = false; 
-                uploadVideo.play().catch(e => {
-                    uploadVideo.muted = true;
-                    uploadVideo.play();
+                uploadVideoSource.pause();
+                uploadVideoSource.currentTime = 0;
+                uploadVideoSource.src = url;
+                uploadCanvas.style.display = 'block';
+                uploadVideoSource.load();
+                uploadVideoSource.muted = false; 
+                uploadVideoSource.play().then(() => {
+                    cancelAnimationFrame(animationFrameId);
+                    processVideoFrame();
+                }).catch(e => {
+                    uploadVideoSource.muted = true;
+                    uploadVideoSource.play().then(() => {
+                        cancelAnimationFrame(animationFrameId);
+                        processVideoFrame();
+                    });
                 });
             }
 
