@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live - Chroma Key Absolute Clean Fix</title>
+    <title>TikTok Live - Black Screen Key (Green Screen Style)</title>
     <!-- Memuat Google Font Cormorant Garamond -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -291,64 +291,110 @@
         const wrapperContainer = document.getElementById('wrapperContainer');
         const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
 
-        // ==========================================================
-        // KUALITAS TANPA CACAT + ANTI LAG:
-        // Chroma key diproses di RESOLUSI ASLI video (tidak dikecilkan)
-        // di dalam Web Worker (thread terpisah) -> tajam maksimal & mulus 60fps.
-        // ==========================================================
+        // ============================================================
+        // BLACK SCREEN KEY (perilaku seperti green screen, tapi hitam):
+        // 1. Piksel hitam di tepi frame di-flood-fill -> hanya LATAR yang hilang
+        // 2. Bagian gelap DI DALAM efek tetap OPAQUE 100% (host tidak tembus)
+        // 3. Dilasi 2px membersihkan noise kompresi di sekitar tepi
+        // Diproses full-resolusi di Web Worker -> tajam & mulus.
+        // ============================================================
 
-        const workerCode = `
-        let offCanvas = null;
-        let offCtx = null;
-
-        self.onmessage = (e) => {
-            const { bitmap, width, height } = e.data;
-            try {
-                if (!offCanvas || offCanvas.width !== width || offCanvas.height !== height) {
-                    offCanvas = new OffscreenCanvas(width, height);
-                    offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
-                }
-                offCtx.clearRect(0, 0, width, height);
-                offCtx.drawImage(bitmap, 0, 0, width, height);
-                bitmap.close();
-
-                const frame = offCtx.getImageData(0, 0, width, height);
-                const data = frame.data;
-                const len = data.length;
-
-                for (let i = 0; i < len; i += 4) {
-                    const r = data[i];
-                    const g = data[i + 1];
-                    const b = data[i + 2];
-                    const maxVal = Math.max(r, g, b);
-
-                    if (maxVal <= 30) {
-                        data[i + 3] = 0;
-                    } else if (maxVal < 70) {
-                        data[i + 3] = Math.round(((maxVal - 30) / 40) * 255);
-                    } else {
-                        data[i + 3] = 255;
-                    }
-
-                    if (g > 100 && g > r * 1.3 && g > b * 1.3) {
-                        data[i + 3] = 0;
-                    }
-                }
-
-                offCtx.putImageData(frame, 0, 0);
-
-                const result = self.createImageBitmap(offCanvas);
-                result.then((bmp) => {
-                    self.postMessage({ done: true, bitmap: bmp, width: width, height: height }, [bmp]);
-                }).catch(() => {
-                    self.postMessage({ done: true, bitmap: null, width: width, height: height });
-                });
-            } catch (err) {
-                if (bitmap && bitmap.close) bitmap.close();
-                self.postMessage({ done: true, bitmap: null, width: width, height: height });
-            }
-        };
-        `;
+        const workerCode = [
+            "let offCanvas = null;",
+            "let offCtx = null;",
+            "let mask = null;",
+            "let queue = null;",
+            "const BLACK_TH = 34;", // ambang 'kehitaman' kandidat latar",
+            "",
+            "self.onmessage = function(e) {",
+            "    const bitmap = e.data.bitmap;",
+            "    const width = e.data.width;",
+            "    const height = e.data.height;",
+            "    try {",
+            "        if (!offCanvas || offCanvas.width !== width || offCanvas.height !== height) {",
+            "            offCanvas = new OffscreenCanvas(width, height);",
+            "            offCtx = offCanvas.getContext('2d', { willReadFrequently: true });",
+            "            mask = new Uint8Array(width * height);",
+            "            queue = new Int32Array(width * height);",
+            "        }",
+            "        offCtx.clearRect(0, 0, width, height);",
+            "        offCtx.drawImage(bitmap, 0, 0, width, height);",
+            "        bitmap.close();",
+            "",
+            "        const frame = offCtx.getImageData(0, 0, width, height);",
+            "        const data = frame.data;",
+            "        const len = width * height;",
+            "",
+            // Tahap 1: tandai kandidat latar hitam (nilai 1)
+            "        for (let p = 0; p < len; p++) {",
+            "            const i = p * 4;",
+            "            const mx = Math.max(data[i], data[i + 1], data[i + 2]);",
+            "            mask[p] = (mx < BLACK_TH) ? 1 : 0;",
+            "        }",
+            "",
+            // Tahap 2: flood fill dari seluruh tepi frame (nilai 2 = latar tersambung tepi)
+            "        let qs = 0, qe = 0;",
+            "        function push(p) {",
+            "            if (mask[p] === 1) { mask[p] = 2; queue[qe++] = p; }",
+            "        }",
+            "        for (let x = 0; x < width; x++) { push(x); push((height - 1) * width + x); }",
+            "        for (let y = 0; y < height; y++) { push(y * width); push(y * width + width - 1); }",
+            "        while (qs < qe) {",
+            "            const p = queue[qs++];",
+            "            const x = p % width;",
+            "            if (x > 0) push(p - 1);",
+            "            if (x < width - 1) push(p + 1);",
+            "            if (p >= width) push(p - width);",
+            "            if (p + width < len) push(p + width);",
+            "        }",
+            "",
+            // Tahap 3: dilasi 2px (makan noise kompresi di sekitar tepi latar)
+            "        function dilate(allowThree) {",
+            "            for (let y = 0; y < height; y++) {",
+            "                const row = y * width;",
+            "                for (let x = 1; x < width - 1; x++) {",
+            "                    const p = row + x;",
+            "                    if (mask[p] === 0) {",
+            "                        const l = mask[p - 1], r = mask[p + 1];",
+            "                        if (l === 2 || r === 2 || (allowThree && (l === 3 || r === 3))) mask[p] = 3;",
+            "                    }",
+            "                }",
+            "            }",
+            "            for (let y = 1; y < height - 1; y++) {",
+            "                const row = y * width;",
+            "                for (let x = 0; x < width; x++) {",
+            "                    const p = row + x;",
+            "                    if (mask[p] === 0) {",
+            "                        const u = mask[p - width], d = mask[p + width];",
+            "                        if (u === 2 || d === 2 || (allowThree && (u === 3 || d === 3))) mask[p] = 3;",
+            "                    }",
+            "                }",
+            "            }",
+            "        }",
+            "        dilate(false);",
+            "        dilate(true);",
+            "",
+            // Tahap 4: terapkan alpha
+            // - latar (2/3) -> transparan penuh
+            // - hitam interior (1) & konten (0) -> OPAQUE penuh 255 (host tidak tembus)
+            "        for (let p = 0; p < len; p++) {",
+            "            const m = mask[p];",
+            "            data[p * 4 + 3] = (m === 2 || m === 3) ? 0 : 255;",
+            "        }",
+            "",
+            "        offCtx.putImageData(frame, 0, 0);",
+            "        const result = self.createImageBitmap(offCanvas);",
+            "        result.then(function(bmp) {",
+            "            self.postMessage({ done: true, bitmap: bmp, width: width, height: height }, [bmp]);",
+            "        }).catch(function() {",
+            "            self.postMessage({ done: true, bitmap: null, width: width, height: height });",
+            "        });",
+            "    } catch (err) {",
+            "        if (bitmap && bitmap.close) bitmap.close();",
+            "        self.postMessage({ done: true, bitmap: null, width: width, height: height });",
+            "    }",
+            "};"
+        ].join("\\n");
 
         let chromaWorker = null;
         let workerReady = false;
@@ -383,7 +429,7 @@
         let targetWidth = 495;
         let targetHeight = 880;
 
-        // Canvas offscreen fallback (untuk browser lama yang tak dukung Worker)
+        // Canvas offscreen fallback (browser lama)
         const offCanvas = document.createElement('canvas');
         const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
 
@@ -406,13 +452,70 @@
         function setupOffscreen() {
             const vw = uploadVideoSource.videoWidth || targetWidth;
             const vh = uploadVideoSource.videoHeight || targetHeight;
-            const cap = Math.min(1, targetWidth / vw);
+            const cap = Math.min(1, 760 / vw); // fallback: batasi agar tetap ringan
             offCanvas.width = Math.max(1, Math.round(vw * cap));
             offCanvas.height = Math.max(1, Math.round(vh * cap));
         }
         uploadVideoSource.addEventListener('loadeddata', setupOffscreen);
 
-        // Gambar hasil chroma key ke layar (cover fit) dengan smoothing kualitas tinggi
+        // Algoritma black screen key (sama seperti worker) - untuk fallback
+        function keyBlackBackground(data, width, height) {
+            const BLACK_TH = 34;
+            const len = width * height;
+            const mask = new Uint8Array(len);
+            const queue = new Int32Array(len);
+
+            for (let p = 0; p < len; p++) {
+                const i = p * 4;
+                const mx = Math.max(data[i], data[i + 1], data[i + 2]);
+                mask[p] = (mx < BLACK_TH) ? 1 : 0;
+            }
+
+            let qs = 0, qe = 0;
+            const push = (p) => { if (mask[p] === 1) { mask[p] = 2; queue[qe++] = p; } };
+            for (let x = 0; x < width; x++) { push(x); push((height - 1) * width + x); }
+            for (let y = 0; y < height; y++) { push(y * width); push(y * width + width - 1); }
+            while (qs < qe) {
+                const p = queue[qs++];
+                const x = p % width;
+                if (x > 0) push(p - 1);
+                if (x < width - 1) push(p + 1);
+                if (p >= width) push(p - width);
+                if (p + width < len) push(p + width);
+            }
+
+            const dilate = (allowThree) => {
+                for (let y = 0; y < height; y++) {
+                    const row = y * width;
+                    for (let x = 1; x < width - 1; x++) {
+                        const p = row + x;
+                        if (mask[p] === 0) {
+                            const l = mask[p - 1], r = mask[p + 1];
+                            if (l === 2 || r === 2 || (allowThree && (l === 3 || r === 3))) mask[p] = 3;
+                        }
+                    }
+                }
+                for (let y = 1; y < height - 1; y++) {
+                    const row = y * width;
+                    for (let x = 0; x < width; x++) {
+                        const p = row + x;
+                        if (mask[p] === 0) {
+                            const u = mask[p - width], d = mask[p + width];
+                            if (u === 2 || d === 2 || (allowThree && (u === 3 || d === 3))) mask[p] = 3;
+                        }
+                    }
+                }
+            };
+            dilate(false);
+            dilate(true);
+
+            for (let p = 0; p < len; p++) {
+                const m = mask[p];
+                data[p * 4 + 3] = (m === 2 || m === 3) ? 0 : 255;
+            }
+        }
+
+        // Gambar hasil key ke layar (cover fit) dengan smoothing kualitas tinggi
         function drawChromaResult(source, srcW, srcH) {
             const scale = Math.max(targetWidth / srcW, targetHeight / srcH);
             const drawW = srcW * scale;
@@ -426,7 +529,7 @@
             ctx.drawImage(source, drawX, drawY, drawW, drawH);
         }
 
-        // Jalur utama: full resolusi via Worker (paling tajam, tanpa cacat)
+        // Jalur utama: full resolusi via Worker (paling tajam)
         function processFrameFullQuality() {
             if (!workerReady || workerBusy) return;
             const vw = uploadVideoSource.videoWidth;
@@ -442,7 +545,7 @@
             });
         }
 
-        // Jalur cadangan: offscreen ringan (browser lama)
+        // Jalur cadangan: offscreen (browser lama)
         function processFrameFallback() {
             if (offCanvas.width === 0) setupOffscreen();
 
@@ -450,29 +553,7 @@
             offCtx.drawImage(uploadVideoSource, 0, 0, offCanvas.width, offCanvas.height);
 
             const frame = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
-            const data = frame.data;
-            const len = data.length;
-
-            for (let i = 0; i < len; i += 4) {
-                const r = data[i];
-                const g = data[i + 1];
-                const b = data[i + 2];
-                const maxVal = Math.max(r, g, b);
-
-                if (maxVal <= 30) {
-                    data[i + 3] = 0;
-                } 
-                else if (maxVal < 70) {
-                    data[i + 3] = Math.round(((maxVal - 30) / 40) * 255);
-                } 
-                else {
-                    data[i + 3] = 255;
-                }
-
-                if (g > 100 && g > r * 1.3 && g > b * 1.3) {
-                    data[i + 3] = 0;
-                }
-            }
+            keyBlackBackground(frame.data, offCanvas.width, offCanvas.height);
             offCtx.putImageData(frame, 0, 0);
 
             drawChromaResult(offCanvas, offCanvas.width, offCanvas.height);
@@ -673,6 +754,20 @@
                     giftPopup.style.animation = 'giftPopupAnim 3s ease forwards';
                 }
             }
+        };
+
+        const giftDatabase = {
+            "Adam's Dream": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9a586391fbb1e21621c4203e5563a9e0~tplv-obj.webp",
+            "Antar Bintang": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp",
+            "Dragon Flame": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/89b4d1d93c1cc614e3a0903ac7a94e0c~tplv-obj.webp",
+            "Fire Phoenix": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/bfb8425a7e8fa03f9fec05a973a4a506.png~tplv-obj.webp",
+            "Kota Masa Depan": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/291de897e4a8c3b72c358a9734c5b7d8.png~tplv-obj.webp",
+            "Legend Marcellus": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/resource/2493534c2e9d914e6b503c3a836e72e9.png~tplv-obj.webp",
+            "Pegasus": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/f600a2495ab5d250e7da2066484a9383.png~tplv-obj.webp",
+            "Red Lightning": "https://p16-webcast.tiktokcdn.com/img/alisg/webcast-sg/e7ce188da898772f18aaffe49a7bd7db~tplv-obj.webp",
+            "Singa": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp",
+            "Thunder Falcon": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/26f3fbcda383e6093a19b8e7351a164c~tplv-obj.webp",
+            "TikTok Universe": "https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
         };
     </script>
 </body>
