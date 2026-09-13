@@ -31,7 +31,7 @@
 
         /* ============ KOTAK DISPLAY ala PRATINJAU POTRET TIKTOK STUDIO ============
            Basis tetap 495x880 (9:16), lalu di-scale via transform agar
-           selalu memenuhi layar — persis preview potret di TikTok Studio. */
+           selalu MEMENUHI LAYAR (panjang penuh sampai bawah). */
         .wrapper-9-16 {
             width: 495px;
             height: 880px;
@@ -71,6 +71,7 @@
             display: block;
         }
 
+        /* ===== DIKEMBALIKAN: container seperti desain awal, kotak numpuk di atas ===== */
         .main-container {
             position: absolute;
             top: 10px;
@@ -89,6 +90,7 @@
             gap: 8px;
         }
 
+        /* ===== DIKEMBALIKAN: kotak segi-4 ukuran asli 115x112, tetap di atas ===== */
         .box {
             width: 115px;
             height: 112px;
@@ -228,7 +230,7 @@
         }
 
         /* ============ MODE BERSIH (tekan H) — untuk capture OBS ============
-           Menghilangkan frame/bezel, kotak memenuhi layar apa adanya. */
+           Menghilangkan frame/bezel, tampilan memenuhi layar apa adanya. */
         body.clean .wrapper-9-16 {
             border-color: transparent;
             border-radius: 0;
@@ -318,8 +320,7 @@
         const studioStage = document.getElementById('studioStage');
         const ctx = animCanvas.getContext('2d', { willReadFrequently: true });
 
-        // Basis desain tetap 9:16 (495x880) — kotak di-scale otomatis agar
-        // memenuhi layar seperti pratinjau potret di TikTok Studio.
+        // Basis desain tetap 9:16 (495x880)
         const DESIGN_W = 495;
         const DESIGN_H = 880;
 
@@ -327,28 +328,45 @@
         let targetWidth = DESIGN_W;
         let targetHeight = DESIGN_H;
 
-        // ============ AUTO-SCALE KOTAK DISPLAY (gaya TikTok Studio) ============
+        // ============ MODE SKALA (UBAH) ============
+        // 'stretch' (default) -> frame MELEBAR/MEMANJANG mengisi layar penuh,
+        //                        kotak tetap segi-4 kecil di atas (bentuk asli)
+        // 'fit'               -> proporsi 9:16 asli utuh (ada sisa ruang jika layar tidak 9:16)
+        let fitMode = 'stretch';
+
         function applyScale() {
             const clean = document.body.classList.contains('clean');
-            const framePad = clean ? 0 : 14; // ruang utk bezel+shadow di mode normal
-            const availW = studioStage.clientWidth - framePad;
-            const availH = studioStage.clientHeight - framePad;
-            const s = Math.max(0.05, Math.min(availW / DESIGN_W, availH / DESIGN_H));
-            wrapperContainer.style.transform = `scale(${s})`;
+            const framePad = clean ? 0 : 14;
+            const availW = Math.max(50, studioStage.clientWidth - framePad);
+            const availH = Math.max(50, studioStage.clientHeight - framePad);
+
+            let sx, sy;
+            if (fitMode === 'stretch') {
+                // Lebar & panjang masing-masing dipaksa mengisi layar
+                sx = Math.max(0.05, availW / DESIGN_W);
+                sy = Math.max(0.05, availH / DESIGN_H);
+            } else {
+                // Proporsi asli dipertahankan
+                const s = Math.max(0.05, Math.min(availW / DESIGN_W, availH / DESIGN_H));
+                sx = sy = s;
+            }
+
+            wrapperContainer.style.transform = `scale(${sx}, ${sy})`;
             requestAnimationFrame(initCanvasResolution);
         }
 
+        // (UBAH) resolusi canvas mengikuti skala X & Y yang berbeda
         function initCanvasResolution() {
             const rect = wrapperContainer.getBoundingClientRect();
             targetWidth = DESIGN_W;
             targetHeight = DESIGN_H;
 
             const dpr = window.devicePixelRatio || 1;
-            // Buffer piksel mengikuti ukuran TERSKALA agar tetap tajam
             animCanvas.width = Math.max(1, Math.round(rect.width * dpr));
             animCanvas.height = Math.max(1, Math.round(rect.height * dpr));
-            const eff = (rect.width / DESIGN_W) * dpr;
-            ctx.setTransform(eff, 0, 0, eff, 0, 0);
+            const ex = (rect.width / DESIGN_W) * dpr;
+            const ey = (rect.height / DESIGN_H) * dpr;
+            ctx.setTransform(ex, 0, 0, ey, 0, 0);
         }
 
         window.addEventListener('resize', applyScale);
@@ -358,6 +376,10 @@
             if (k === 'f') {
                 if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
                 else document.exitFullscreen().catch(() => {});
+            }
+            if (k === 'v') { // ganti mode skala: stretch <-> fit
+                fitMode = (fitMode === 'stretch') ? 'fit' : 'stretch';
+                applyScale();
             }
         });
         document.addEventListener('fullscreenchange', applyScale);
